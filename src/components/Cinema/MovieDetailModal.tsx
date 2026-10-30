@@ -124,10 +124,12 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => onPlayMovie(movie)}
-                className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm flex items-center gap-2 shadow-xl shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all"
+                className="uiverse-glow-btn group"
               >
-                <Play className="w-4 h-4 fill-black" />
-                {movie.type === 'series' ? 'Play Episode 1' : 'Play Cinema Movie'}
+                <div className="uiverse-glow-btn-inner !bg-gradient-to-r !from-cyan-400 !to-sky-400 !text-black font-black">
+                  <Play className="w-4 h-4 fill-black" />
+                  <span>{movie.type === 'series' ? 'Play Episode 1' : 'Play Cinema Movie'}</span>
+                </div>
               </button>
 
               <button

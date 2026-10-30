@@ -64,33 +64,42 @@ export const Navbar: React.FC<NavbarProps> = ({
                 AIOStreams v2.37
               </span>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono tracking-wider flex items-center gap-1 mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              MULTI-SERVER 4K STREAM ENGINE
-            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="uiverse-eq-container">
+                <span className="uiverse-eq-bar" />
+                <span className="uiverse-eq-bar" />
+                <span className="uiverse-eq-bar" />
+                <span className="uiverse-eq-bar" />
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono tracking-wider">
+                MULTI-SERVER 4K STREAM ENGINE
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Center: Quick Search Input */}
+      {/* 2. Center: Uiverse Glow Focus Search Input */}
       <div className="flex-1 max-w-md hidden md:block">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Quick search movies, series, cast, or genres..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-9 py-2 rounded-2xl bg-white/5 border border-white/10 focus:border-cyan-500 focus:bg-white/10 text-xs text-white placeholder-slate-500 focus:outline-none transition-colors"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+        <div className="uiverse-input-wrapper">
+          <div className="relative bg-[#070913]/90 rounded-[calc(1rem-1px)]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
+            <input
+              type="text"
+              placeholder="Quick search movies, series, cast, or genres..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full pl-10 pr-9 py-2 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

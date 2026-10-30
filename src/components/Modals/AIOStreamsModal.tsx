@@ -232,7 +232,7 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
                 {filteredAddons.map((addon) => (
                   <div 
                     key={addon.id}
-                    className={`p-4 rounded-2xl border transition-all duration-200 ${
+                    className={`p-4 rounded-2xl border transition-all duration-200 uiverse-card ${
                       addon.enabled
                         ? 'bg-slate-900/60 border-cyan-500/30 shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
                         : 'bg-black/30 border-white/5 opacity-60'
@@ -254,8 +254,8 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
                             <span className="text-[10px] text-slate-400 font-mono">{addon.version}</span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
-                              <Activity className="w-2.5 h-2.5" />
+                            <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono font-bold">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />
                               {addon.latencyMs}ms
                             </span>
                             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">

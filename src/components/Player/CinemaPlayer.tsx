@@ -483,7 +483,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
         {/* Scrubber / Progress Bar (HTML5 video only) */}
         {!isEmbedStream && (
           <div className="flex items-center gap-3 w-full">
-            <span className="text-[11px] font-mono text-slate-300 min-w-[38px]">
+            <span className="text-[11px] font-mono text-cyan-300 min-w-[38px] font-bold">
               {formatTime(currentTime)}
             </span>
             <input
@@ -492,7 +492,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
               max={duration || 100}
               value={currentTime}
               onChange={handleSeekChange}
-              className="flex-1 h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-cyan-400 hover:h-2 transition-all"
+              className="flex-1 uiverse-slider cursor-pointer"
             />
             <span className="text-[11px] font-mono text-slate-400 min-w-[38px] text-right">
               {formatTime(duration)}

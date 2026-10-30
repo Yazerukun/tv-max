@@ -97,6 +97,188 @@ body {
   background: linear-gradient(90deg, #070913 0%, rgba(7, 9, 19, 0.9) 35%, rgba(7, 9, 19, 0.45) 70%, transparent 100%);
 }
 
+/* ==========================================================================
+   UIVERSE.IO INSPIRED LUXURY COMPONENT SUITE
+   ========================================================================== */
+
+/* 1. Uiverse Animated Cyber Glow Button */
+.uiverse-glow-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #06b6d4, #6366f1, #a855f7);
+  padding: 1.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.35), 0 0 40px rgba(99, 102, 241, 0.2);
+}
+
+.uiverse-glow-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.6), 0 0 60px rgba(168, 85, 247, 0.4);
+}
+
+.uiverse-glow-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.uiverse-glow-btn-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: #070913;
+  padding: 0.75rem 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  transition: background 0.2s ease;
+}
+
+.uiverse-glow-btn:hover .uiverse-glow-btn-inner {
+  background: rgba(7, 9, 19, 0.85);
+}
+
+/* 2. Uiverse Card Shimmer Light Sweep */
+.uiverse-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.uiverse-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 70%
+  );
+  transform: rotate(25deg) translateY(-100%);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.uiverse-card:hover::after {
+  transform: rotate(25deg) translateY(100%);
+}
+
+.uiverse-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 35px -10px rgba(6, 182, 212, 0.25), 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+/* 3. Uiverse Live Radar Pulse Ping */
+@keyframes uiverse-radar-ping {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.uiverse-radar {
+  position: relative;
+}
+
+.uiverse-radar::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.4;
+  animation: uiverse-radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* 4. Uiverse Glassmorphic Border Glow Input */
+.uiverse-input-wrapper {
+  position: relative;
+  border-radius: 1rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  transition: all 0.3s ease;
+}
+
+.uiverse-input-wrapper:focus-within {
+  background: linear-gradient(135deg, #06b6d4, #a855f7);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+}
+
+/* 5. Uiverse Audio Equalizer Bars */
+.uiverse-eq-container {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.uiverse-eq-bar {
+  width: 2.5px;
+  background: #06b6d4;
+  border-radius: 9999px;
+  animation: uiverse-eq-anim 1s ease-in-out infinite alternate;
+}
+
+.uiverse-eq-bar:nth-child(1) { animation-duration: 0.6s; }
+.uiverse-eq-bar:nth-child(2) { animation-duration: 0.9s; animation-delay: 0.2s; }
+.uiverse-eq-bar:nth-child(3) { animation-duration: 0.7s; animation-delay: 0.4s; }
+.uiverse-eq-bar:nth-child(4) { animation-duration: 1.1s; animation-delay: 0.1s; }
+
+@keyframes uiverse-eq-anim {
+  0% { height: 3px; }
+  100% { height: 14px; }
+}
+
+/* 6. Uiverse Cyber Scrubber / Range Slider */
+input[type='range'].uiverse-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input[type='range'].uiverse-slider:hover {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+input[type='range'].uiverse-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00f0ff;
+  cursor: pointer;
+  box-shadow: 0 0 12px #00f0ff, 0 0 24px rgba(0, 240, 255, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type='range'].uiverse-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 16px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.8);
+}
+
 /* Hide scrollbar for carousel rails */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

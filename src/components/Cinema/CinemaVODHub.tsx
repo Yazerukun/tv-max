@@ -168,7 +168,8 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 <span className="text-xs sm:text-sm font-black text-white tracking-wider uppercase">
                   Nuvio Mobile & AIOStreams v2.37.0
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />
                   ONLINE • 14ms
                 </span>
               </div>
@@ -299,10 +300,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={() => onPlayMovie(activeHeroMovie)}
-                  className="px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-sm flex items-center gap-2 shadow-xl shadow-cyan-500/35 hover:scale-105 active:scale-95 transition-all"
+                  className="uiverse-glow-btn group"
                 >
-                  <Play className="w-4 h-4 fill-black" />
-                  <span>Stream 4K Cinema</span>
+                  <div className="uiverse-glow-btn-inner !bg-gradient-to-r !from-cyan-400 !to-sky-400 !text-black font-black">
+                    <Play className="w-4 h-4 fill-black" />
+                    <span>Stream 4K Cinema</span>
+                  </div>
                 </button>
 
                 <button
@@ -453,7 +456,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                     </span>
 
                     {/* Movie Card */}
-                    <div className="relative aspect-[2/3] w-36 sm:w-44 rounded-2xl overflow-hidden bg-slate-900 border border-white/10 group-hover:border-cyan-500/60 shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300 group-hover:scale-105">
+                    <div className="relative aspect-[2/3] w-36 sm:w-44 rounded-2xl overflow-hidden bg-slate-900 border border-white/10 group-hover:border-cyan-500/60 shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300 uiverse-card">
                       <img
                         src={movie.posterUrl}
                         alt={movie.title}
@@ -530,7 +533,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <div
                     key={series.id}
                     onClick={() => setActiveModalMovie(series)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-purple-500/50 p-2 transition-all hover:-translate-y-1"
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-purple-500/50 p-2 transition-all uiverse-card"
                   >
                     <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
                       <img
@@ -598,7 +601,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <div
                     key={movie.id}
                     onClick={() => setActiveModalMovie(movie)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-rose-500/50 p-2 transition-all hover:-translate-y-1"
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-rose-500/50 p-2 transition-all uiverse-card"
                   >
                     <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
                       <img
@@ -662,7 +665,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <div
                     key={anime.id}
                     onClick={() => setActiveModalMovie(anime)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 p-2 transition-all hover:-translate-y-1"
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 p-2 transition-all uiverse-card"
                   >
                     <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
                       <img
@@ -726,7 +729,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <div
                     key={movie.id}
                     onClick={() => setActiveModalMovie(movie)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-indigo-500/50 p-2 transition-all hover:-translate-y-1"
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-indigo-500/50 p-2 transition-all uiverse-card"
                   >
                     <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
                       <img
@@ -793,7 +796,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 <div
                   key={movie.id}
                   onClick={() => setActiveModalMovie(movie)}
-                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 shadow-lg hover:shadow-cyan-500/10 cursor-pointer transform hover:-translate-y-1.5 transition-all duration-300"
+                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 shadow-lg hover:shadow-cyan-500/10 cursor-pointer uiverse-card"
                 >
                   {/* Poster Image */}
                   <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-950">

@@ -115,22 +115,24 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#04060c] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
-      {/* 1. TV MAX Universal Navbar */}
-      <Navbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
-        onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
-        onSelectCategory={(cat) => {
-          setSelectedCategory(cat);
-          if (activeMovie) setActiveMovie(null);
-          refreshWatchlistCount();
-        }}
-        selectedCategory={selectedCategory}
-        watchlistCount={watchlistCount}
-        viewMode={viewMode}
-        onToggleViewMode={handleToggleViewMode}
-      />
+      {/* 1. TV MAX Universal Navbar (Hidden during active cinema playback for 100% viewport fit) */}
+      {!activeMovie && (
+        <Navbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
+          onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
+          onSelectCategory={(cat) => {
+            setSelectedCategory(cat);
+            if (activeMovie) setActiveMovie(null);
+            refreshWatchlistCount();
+          }}
+          selectedCategory={selectedCategory}
+          watchlistCount={watchlistCount}
+          viewMode={viewMode}
+          onToggleViewMode={handleToggleViewMode}
+        />
+      )}
 
       {/* 2. Main Viewport: Cinema Player vs Nuvio Media Catalog */}
       <main className="flex-1 w-full relative">

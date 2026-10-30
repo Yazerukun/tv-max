@@ -1,0 +1,17 @@
+{
+  "short_name": "TV MAX",
+  "name": "TV MAX — Ultra-Premium Live TV & Nuvio Cinema",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2306b6d4'><path d='M21 6H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7v-3.5a.5.5 0 0 1 .8-.4l3.5 1.75a.5.5 0 0 1 0 .9L11.8 13.5a.5.5 0 0 1-.8-.5zM8 3l4 3 4-3'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/?pwa=true",
+  "background_color": "#05060a",
+  "theme_color": "#06b6d4",
+  "display": "standalone",
+  "orientation": "any"
+}

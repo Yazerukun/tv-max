@@ -147,6 +147,12 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             src={details.backdropUrl} 
             alt={details.title}
             className="w-full h-full object-cover filter brightness-60 scale-105"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('metahub.space')) {
+                target.src = `https://images.metahub.space/background/medium/${details.id}/img`;
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#090b11] via-[#090b11]/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#090b11]/80 via-transparent to-transparent" />

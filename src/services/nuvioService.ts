@@ -34,8 +34,16 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
   const yearNumber = typeof item.year === 'string' ? parseInt(item.year) || 2024 : item.year || 2024;
   const ratingNumber = typeof item.imdbRating === 'string' ? parseFloat(item.imdbRating) || 7.5 : item.imdbRating || 7.5;
   
-  const poster = item.poster || `https://images.metahub.space/poster/medium/${item.id}/img`;
-  const backdrop = item.background || `https://images.metahub.space/background/medium/${item.id}/img`;
+  // Use high-resolution theatrical artwork
+  let poster = item.poster || `https://images.metahub.space/poster/medium/${item.id}/img`;
+  if (poster.includes('/poster/small/')) {
+    poster = poster.replace('/poster/small/', '/poster/medium/');
+  }
+
+  let backdrop = item.background || `https://images.metahub.space/background/medium/${item.id}/img`;
+  if (backdrop.includes('/background/small/')) {
+    backdrop = backdrop.replace('/background/small/', '/background/medium/');
+  }
 
   // Process series episodes if present
   let seasons: Season[] | undefined = undefined;
@@ -69,6 +77,18 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
   const castArray = Array.isArray(item.cast) ? item.cast : [];
   const directorString = Array.isArray(item.director) ? item.director.join(', ') : item.director || 'Cinemeta Director';
   const genresArray = Array.isArray(item.genres) && item.genres.length > 0 ? item.genres : ['Action', 'Drama'];
+  const genresLower = genresArray.map(g => g.toLowerCase());
+
+  let detectedCategory: CinemaMovie['category'] = defaultCategory;
+  if (isSeries) {
+    detectedCategory = 'series';
+  } else if (genresLower.some(g => g.includes('anim'))) {
+    detectedCategory = 'anime';
+  } else if (genresLower.some(g => g.includes('action') || g.includes('sci-fi') || g.includes('thriller') || g.includes('adventure'))) {
+    detectedCategory = 'action';
+  } else if (genresLower.some(g => g.includes('family') || g.includes('comedy'))) {
+    detectedCategory = 'family';
+  }
 
   const realServers = buildRealMovieStreams(item.id, isSeries ? 'series' : 'movie');
 
@@ -81,7 +101,7 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
     imdbScore: ratingNumber,
     duration: item.runtime || (isSeries ? 'Series' : '2h 10m'),
     genres: genresArray,
-    category: isSeries ? 'series' : defaultCategory,
+    category: detectedCategory,
     backdropUrl: backdrop,
     posterUrl: poster,
     synopsis: item.description || `${item.name} (${yearNumber}) is an acclaimed ${genresArray.join(', ')} title.`,
@@ -95,22 +115,119 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
   };
 }
 
-// 1. Fetch Realtime Trending Catalog from Cinemeta
-export async function fetchRealtimeCatalog(type: 'movie' | 'series' = 'movie'): Promise<CinemaMovie[]> {
+// 1. Fetch Realtime Catalog from Cinemeta with optional genre and skip pagination
+export async function fetchRealtimeCatalog(
+  type: 'movie' | 'series' = 'movie',
+  genre?: string,
+  skip?: number
+): Promise<CinemaMovie[]> {
   try {
-    const res = await fetch(`${CINEMETA_BASE}/catalog/${type}/top.json`);
+    let url = `${CINEMETA_BASE}/catalog/${type}/top`;
+    const parts: string[] = [];
+    if (genre) parts.push(`genre=${encodeURIComponent(genre)}`);
+    if (skip && skip > 0) parts.push(`skip=${skip}`);
+    if (parts.length > 0) {
+      url += `/${parts.join('&')}.json`;
+    } else {
+      url += '.json';
+    }
+
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`Cinemeta error: ${res.status}`);
     const data = await res.json();
     if (!data.metas || !Array.isArray(data.metas)) return [];
 
-    return data.metas.slice(0, 20).map((item: CinemetaMetaItem) => formatCinemetaMovie(item, type === 'series' ? 'series' : 'trending'));
+    return data.metas.map((item: CinemetaMetaItem) => 
+      formatCinemetaMovie(item, type === 'series' ? 'series' : 'trending')
+    );
   } catch (err) {
-    console.warn('[NuvioService] Failed to fetch realtime catalog:', err);
+    console.warn(`[NuvioService] Failed to fetch catalog (${type}, ${genre || 'all'}, skip=${skip || 0}):`, err);
     return [];
   }
 }
 
-// 2. Realtime Search across Cinemeta
+export interface MultiCategoryCatalogs {
+  allMovies: CinemaMovie[];
+  topTrending: CinemaMovie[];
+  series: CinemaMovie[];
+  action: CinemaMovie[];
+  anime: CinemaMovie[];
+  family: CinemaMovie[];
+  horror: CinemaMovie[];
+  adventure: CinemaMovie[];
+}
+
+// 2. Fetch Multi-Category Catalogs (Hundreds of Real Movies & Series in parallel)
+export async function fetchMultiCategoryCatalogs(): Promise<MultiCategoryCatalogs> {
+  try {
+    const [
+      moviesP1,
+      moviesP2,
+      seriesP1,
+      seriesP2,
+      actionList,
+      sciFiList,
+      animList,
+      comedyList,
+      horrorList,
+      adventureList
+    ] = await Promise.all([
+      fetchRealtimeCatalog('movie'),
+      fetchRealtimeCatalog('movie', undefined, 50),
+      fetchRealtimeCatalog('series'),
+      fetchRealtimeCatalog('series', undefined, 50),
+      fetchRealtimeCatalog('movie', 'Action'),
+      fetchRealtimeCatalog('movie', 'Sci-Fi'),
+      fetchRealtimeCatalog('movie', 'Animation'),
+      fetchRealtimeCatalog('movie', 'Comedy'),
+      fetchRealtimeCatalog('movie', 'Horror'),
+      fetchRealtimeCatalog('movie', 'Adventure')
+    ]);
+
+    const allMap = new Map<string, CinemaMovie>();
+    const register = (list: CinemaMovie[]) => {
+      list.forEach(m => {
+        if (!allMap.has(m.id)) allMap.set(m.id, m);
+      });
+    };
+
+    register(moviesP1);
+    register(moviesP2);
+    register(seriesP1);
+    register(seriesP2);
+    register(actionList);
+    register(sciFiList);
+    register(animList);
+    register(comedyList);
+    register(horrorList);
+    register(adventureList);
+
+    return {
+      allMovies: Array.from(allMap.values()),
+      topTrending: [...moviesP1, ...moviesP2],
+      series: [...seriesP1, ...seriesP2],
+      action: [...actionList, ...sciFiList],
+      anime: animList,
+      family: comedyList,
+      horror: horrorList,
+      adventure: adventureList
+    };
+  } catch (err) {
+    console.warn('[NuvioService] Multi-category fetch error:', err);
+    return {
+      allMovies: [],
+      topTrending: [],
+      series: [],
+      action: [],
+      anime: [],
+      family: [],
+      horror: [],
+      adventure: []
+    };
+  }
+}
+
+// 3. Realtime Search across Cinemeta (Expanded limits for deep discovery)
 export async function searchRealtimeMovies(query: string): Promise<CinemaMovie[]> {
   if (!query.trim()) return [];
   try {
@@ -125,14 +242,14 @@ export async function searchRealtimeMovies(query: string): Promise<CinemaMovie[]
     if (movieRes.status === 'fulfilled' && movieRes.value.ok) {
       const data = await movieRes.value.json();
       if (data.metas && Array.isArray(data.metas)) {
-        results.push(...data.metas.slice(0, 10).map((m: CinemetaMetaItem) => formatCinemetaMovie(m, 'trending')));
+        results.push(...data.metas.slice(0, 25).map((m: CinemetaMetaItem) => formatCinemetaMovie(m, 'trending')));
       }
     }
 
     if (seriesRes.status === 'fulfilled' && seriesRes.value.ok) {
       const data = await seriesRes.value.json();
       if (data.metas && Array.isArray(data.metas)) {
-        results.push(...data.metas.slice(0, 10).map((s: CinemetaMetaItem) => formatCinemetaMovie(s, 'series')));
+        results.push(...data.metas.slice(0, 25).map((s: CinemetaMetaItem) => formatCinemetaMovie(s, 'series')));
       }
     }
 
@@ -143,7 +260,7 @@ export async function searchRealtimeMovies(query: string): Promise<CinemaMovie[]
   }
 }
 
-// 3. Fetch Full Realtime Metadata including cast & full seasons/episodes
+// 4. Fetch Full Realtime Metadata including cast & full seasons/episodes
 export async function fetchRealtimeDetails(id: string, type: 'movie' | 'series' = 'movie'): Promise<CinemaMovie | null> {
   try {
     const res = await fetch(`${CINEMETA_BASE}/meta/${type}/${id}.json`);

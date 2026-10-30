@@ -1,38 +1,35 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Play, 
-  Info, 
   Star, 
-  Clock, 
   Sparkles, 
   Film, 
-  TrendingUp, 
   Heart, 
   ChevronRight,
   ChevronLeft,
   Flame, 
   Search, 
-  CheckCircle2, 
   Tv, 
   Layers, 
   Zap, 
-  SlidersHorizontal, 
-  FolderOpen,
-  Bookmark,
+  Bookmark, 
   Check,
-  LayoutGrid,
   Rows,
-  Sliders,
-  ShieldCheck,
-  RotateCcw,
-  Compass,
+  LayoutGrid,
   Radio,
-  Loader2
+  Loader2,
+  Skull,
+  Compass
 } from 'lucide-react';
 import { CINEMA_MOVIES, CinemaMovie, Episode } from '../../data/cinemaMovies';
 import { MovieDetailModal } from './MovieDetailModal';
 import { getStoredWatchlist, toggleStoredWatchlist } from '../../utils/storage';
-import { fetchRealtimeCatalog, searchRealtimeMovies } from '../../services/nuvioService';
+import { 
+  fetchMultiCategoryCatalogs, 
+  MultiCategoryCatalogs, 
+  searchRealtimeMovies, 
+  fetchRealtimeCatalog 
+} from '../../services/nuvioService';
 
 interface CinemaVODHubProps {
   onPlayMovie: (movie: CinemaMovie, episode?: Episode) => void;
@@ -51,29 +48,27 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   const [viewMode, setViewMode] = useState<'rails' | 'grid'>('rails');
   const [watchlistIds, setWatchlistIds] = useState<string[]>(() => getStoredWatchlist());
 
-  // Realtime Live Data State from Nuvio Cinemeta API
-  const [liveTrendingMovies, setLiveTrendingMovies] = useState<CinemaMovie[]>([]);
-  const [liveSeriesList, setLiveSeriesList] = useState<CinemaMovie[]>([]);
+  // Realtime Live Data State from Nuvio Cinemeta API (Multi-Category Engine)
+  const [multiCatalogs, setMultiCatalogs] = useState<MultiCategoryCatalogs | null>(null);
+  const [extraMovies, setExtraMovies] = useState<CinemaMovie[]>([]);
+  const [skipCount, setSkipCount] = useState<number>(100);
   const [isLiveLoading, setIsLiveLoading] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [liveSearchMatches, setLiveSearchMatches] = useState<CinemaMovie[]>([]);
   const [isSearchingLive, setIsSearchingLive] = useState<boolean>(false);
 
-  // 1. Fetch Realtime Live Catalog on Mount (Cinemeta API)
+  // 1. Fetch Realtime Live Multi-Category Catalogs on Mount (Cinemeta API: 350+ to 450+ titles)
   useEffect(() => {
     let isMounted = true;
     const fetchLive = async () => {
       try {
         setIsLiveLoading(true);
-        const [movies, series] = await Promise.all([
-          fetchRealtimeCatalog('movie'),
-          fetchRealtimeCatalog('series')
-        ]);
+        const data = await fetchMultiCategoryCatalogs();
         if (isMounted) {
-          setLiveTrendingMovies(movies);
-          setLiveSeriesList(series);
+          setMultiCatalogs(data);
         }
       } catch (err) {
-        console.warn('Realtime catalog fetch error:', err);
+        console.warn('Realtime multi-catalog fetch error:', err);
       } finally {
         if (isMounted) setIsLiveLoading(false);
       }
@@ -106,21 +101,39 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
-  // Combined master catalog: Curated movies + Realtime Cinemeta movies & series + Search matches (deduplicated)
+  // Combined master catalog: Curated movies + Multi-category Cinemeta movies & series + Paginated Extras + Search matches (deduplicated)
   const allCatalogMovies = useMemo(() => {
     const map = new Map<string, CinemaMovie>();
     CINEMA_MOVIES.forEach(m => map.set(m.id, m));
-    liveTrendingMovies.forEach(m => {
-      if (!map.has(m.id)) map.set(m.id, m);
-    });
-    liveSeriesList.forEach(m => {
+    if (multiCatalogs) {
+      multiCatalogs.allMovies.forEach(m => {
+        if (!map.has(m.id)) map.set(m.id, m);
+      });
+    }
+    extraMovies.forEach(m => {
       if (!map.has(m.id)) map.set(m.id, m);
     });
     liveSearchMatches.forEach(m => {
       if (!map.has(m.id)) map.set(m.id, m);
     });
     return Array.from(map.values());
-  }, [liveTrendingMovies, liveSeriesList, liveSearchMatches]);
+  }, [multiCatalogs, extraMovies, liveSearchMatches]);
+
+  // Handle Loading Next 50 Titles on demand
+  const handleLoadMore = async () => {
+    try {
+      setIsLoadingMore(true);
+      const newBatch = await fetchRealtimeCatalog('movie', undefined, skipCount);
+      if (newBatch && newBatch.length > 0) {
+        setExtraMovies(prev => [...prev, ...newBatch]);
+        setSkipCount(prev => prev + 50);
+      }
+    } catch (err) {
+      console.warn('Load more error:', err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   // Multi-Slide Hero Carousel State
   const featuredMovies = useMemo(() => {
@@ -164,6 +177,15 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
         if (m.type !== 'series') return false;
       } else if (selectedCategory === 'trending') {
         if (m.category !== 'trending' && !m.isFeatured) return false;
+      } else if (selectedCategory === 'action') {
+        if (m.type === 'series') return false;
+        if (m.category !== 'action' && !m.genres.some(g => /action|sci-fi|adventure|thriller/i.test(g))) return false;
+      } else if (selectedCategory === 'anime') {
+        if (m.category !== 'anime' && !m.genres.some(g => /anim/i.test(g))) return false;
+      } else if (selectedCategory === 'family') {
+        if (m.category !== 'family' && !m.genres.some(g => /family|comedy/i.test(g))) return false;
+      } else if (selectedCategory === 'pinoy') {
+        if (m.category !== 'pinoy' && !m.genres.some(g => /pinoy/i.test(g))) return false;
       } else if (selectedCategory !== 'all') {
         if (m.category !== selectedCategory) return false;
       }
@@ -182,37 +204,60 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
 
   // Rails categorized lists for Apple TV+ / Netflix Snap Rails
   const top10Trending = useMemo(() => {
-    return [...CINEMA_MOVIES]
+    return allCatalogMovies
+      .filter(m => m.type !== 'series')
       .sort((a, b) => b.imdbScore - a.imdbScore)
       .slice(0, 10);
-  }, []);
+  }, [allCatalogMovies]);
+
+  const liveTrendingMovies = useMemo(() => {
+    if (multiCatalogs && multiCatalogs.topTrending.length > 0) {
+      return multiCatalogs.topTrending;
+    }
+    return allCatalogMovies.filter(m => m.type !== 'series').slice(0, 30);
+  }, [multiCatalogs, allCatalogMovies]);
 
   const tvSeriesList = useMemo(() => {
-    return CINEMA_MOVIES.filter((m) => m.type === 'series');
-  }, []);
-
-  const pinoyMovies = useMemo(() => {
-    return CINEMA_MOVIES.filter((m) => m.category === 'pinoy');
-  }, []);
+    if (multiCatalogs && multiCatalogs.series.length > 0) {
+      return multiCatalogs.series;
+    }
+    return allCatalogMovies.filter((m) => m.type === 'series');
+  }, [multiCatalogs, allCatalogMovies]);
 
   const actionBlockbusters = useMemo(() => {
-    return CINEMA_MOVIES.filter((m) => m.category === 'action' || m.category === 'trending');
-  }, []);
+    if (multiCatalogs && multiCatalogs.action.length > 0) {
+      return multiCatalogs.action;
+    }
+    return allCatalogMovies.filter((m) => m.type !== 'series' && (m.category === 'action' || m.genres.some(g => /action|sci-fi/i.test(g))));
+  }, [multiCatalogs, allCatalogMovies]);
 
   const animeHub = useMemo(() => {
-    return CINEMA_MOVIES.filter((m) => m.category === 'anime');
-  }, []);
+    if (multiCatalogs && multiCatalogs.anime.length > 0) {
+      return multiCatalogs.anime;
+    }
+    return allCatalogMovies.filter((m) => m.category === 'anime' || m.genres.some(g => /anim/i.test(g)));
+  }, [multiCatalogs, allCatalogMovies]);
 
   const familyOpenCinema = useMemo(() => {
-    return CINEMA_MOVIES.filter((m) => m.category === 'family');
-  }, []);
+    if (multiCatalogs && multiCatalogs.family.length > 0) {
+      return multiCatalogs.family;
+    }
+    return allCatalogMovies.filter((m) => m.category === 'family' || m.genres.some(g => /family|comedy/i.test(g)));
+  }, [multiCatalogs, allCatalogMovies]);
 
-  const watchlistMovies = useMemo(() => {
-    return allCatalogMovies.filter((m) => watchlistIds.includes(m.id));
-  }, [allCatalogMovies, watchlistIds]);
+  const horrorHub = useMemo(() => {
+    if (multiCatalogs && multiCatalogs.horror.length > 0) {
+      return multiCatalogs.horror;
+    }
+    return allCatalogMovies.filter((m) => m.genres.some(g => /horror|mystery/i.test(g)));
+  }, [multiCatalogs, allCatalogMovies]);
+
+  const pinoyMovies = useMemo(() => {
+    return allCatalogMovies.filter((m) => m.category === 'pinoy' || m.genres.some(g => /pinoy/i.test(g)));
+  }, [allCatalogMovies]);
 
   const categories = [
-    { id: 'all', label: 'All Catalog', icon: Film },
+    { id: 'all', label: `All Catalog (${allCatalogMovies.length})`, icon: Film },
     { id: 'watchlist', label: `My Watchlist (${watchlistIds.length})`, icon: Bookmark },
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'series', label: 'TV Shows & Series', icon: Tv },
@@ -250,7 +295,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 </span>
                 <span className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
-                  {isLiveLoading ? 'Syncing Cinemeta...' : `Cinemeta Live (${liveTrendingMovies.length + liveSeriesList.length} Streamable)`}
+                  {isLiveLoading ? 'Syncing Cinemeta...' : `Cinemeta Live (${allCatalogMovies.length} Streamable Titles)`}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">
@@ -291,109 +336,101 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
             {onOpenAIOStreams && (
               <button
                 onClick={onOpenAIOStreams}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition flex items-center gap-1.5"
               >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Configure Addons</span>
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>AIO Addons</span>
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* 2. DYNAMIC AUTO-CYCLING HERO SPOTLIGHT BANNER */}
-      {activeHeroMovie && !searchQuery.trim() && selectedCategory === 'all' && (
+      {/* 2. DYNAMIC MULTI-SLIDE HERO SPOTLIGHT CAROUSEL */}
+      {selectedCategory === 'all' && !searchQuery.trim() && activeHeroMovie && (
         <div 
-          className="relative px-4 sm:px-8 py-2 sm:py-3 select-none"
+          className="relative px-4 sm:px-8 py-3"
           onMouseEnter={() => setIsHeroPaused(true)}
           onMouseLeave={() => setIsHeroPaused(false)}
         >
-          <div className="relative w-full h-[58vh] min-h-[420px] max-h-[620px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.85)] group">
+          <div className="relative h-[440px] sm:h-[500px] md:h-[560px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
             {/* Background Backdrop Image */}
-            <img 
-              key={activeHeroMovie.id}
-              src={activeHeroMovie.backdropUrl} 
+            <img
+              src={activeHeroMovie.backdropUrl}
               alt={activeHeroMovie.title}
-              className="absolute inset-0 w-full h-full object-cover object-center filter brightness-50 scale-105 transform group-hover:scale-100 transition-all duration-1000 ease-out" 
+              className="absolute inset-0 w-full h-full object-cover filter brightness-70 transform scale-105 transition-all duration-700 ease-out"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.src.includes('metahub.space')) {
+                  target.src = `https://images.metahub.space/background/medium/${activeHeroMovie.id}/img`;
+                }
+              }}
             />
 
-            {/* Cinematic Vignette Gradients */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-[#04060c]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#04060c] via-[#04060c]/85 to-transparent w-full md:w-3/4" />
+            {/* Cinematic Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#04060c] via-[#04060c]/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#04060c]/90 via-[#04060c]/40 to-transparent" />
 
-            {/* Left & Right Chevron Controls */}
+            {/* Left/Right Carousel Nav Arrows */}
             {featuredMovies.length > 1 && (
               <>
                 <button
-                  onClick={() => setHeroIndex((prev) => (prev === 0 ? featuredMovies.length - 1 : prev - 1))}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-2xl bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-20"
-                  aria-label="Previous Spotlight"
+                  onClick={() => setHeroIndex((prev) => (prev - 1 + featuredMovies.length) % featuredMovies.length)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/10 transition-all z-20 hover:scale-110"
+                  aria-label="Previous Featured"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setHeroIndex((prev) => (prev + 1) % featuredMovies.length)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-2xl bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-20"
-                  aria-label="Next Spotlight"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/10 transition-all z-20 hover:scale-110"
+                  aria-label="Next Featured"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </>
             )}
 
-            {/* Hero Details Content */}
-            <div className="absolute bottom-0 left-0 p-6 sm:p-12 max-w-2xl sm:max-w-3xl space-y-3.5 z-10">
+            {/* Hero Information Dock */}
+            <div className="absolute bottom-8 left-6 sm:left-12 max-w-2xl space-y-3 z-10">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-cyan-400 to-indigo-500 text-black tracking-wider uppercase shadow-lg shadow-cyan-500/25 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 fill-black" />
-                  NUVIO SPOTLIGHT
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black tracking-widest bg-cyan-400 text-black uppercase shadow-sm">
+                  {activeHeroMovie.type === 'series' ? 'FEATURED SERIES' : 'FEATURED BLOCKBUSTER'}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 shadow">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow">
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                   {activeHeroMovie.imdbScore} IMDb
                 </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-slate-200 backdrop-blur-md">
-                  {activeHeroMovie.year}
-                </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-slate-200 backdrop-blur-md">
-                  {activeHeroMovie.duration}
-                </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow">
+                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono text-cyan-300 bg-cyan-950/80 border border-cyan-500/30">
                   {activeHeroMovie.quality}
                 </span>
-                {activeHeroMovie.type === 'series' && (
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-500/40 shadow">
-                    SERIES
-                  </span>
-                )}
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10">
+                  {activeHeroMovie.duration}
+                </span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white font-sans drop-shadow-lg leading-tight">
+              <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-none drop-shadow-md">
                 {activeHeroMovie.title}
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-300 line-clamp-3 sm:line-clamp-4 leading-relaxed drop-shadow max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-300 line-clamp-3 leading-relaxed drop-shadow">
                 {activeHeroMovie.synopsis}
               </p>
 
-              {/* Action Buttons Row */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => onPlayMovie(activeHeroMovie)}
-                  className="uiverse-glow-btn group"
+                  className="px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-cyan-400/30 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 uiverse-glow-btn"
                 >
-                  <div className="uiverse-glow-btn-inner !bg-gradient-to-r !from-cyan-400 !to-sky-400 !text-black font-black">
-                    <Play className="w-4 h-4 fill-black" />
-                    <span>Stream 4K Cinema</span>
-                  </div>
+                  <Play className="w-4 h-4 fill-black" />
+                  <span>STREAM NOW (AIO PRO)</span>
                 </button>
 
                 <button
                   onClick={() => setActiveModalMovie(activeHeroMovie)}
-                  className="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm flex items-center gap-2 backdrop-blur-md border border-white/15 hover:border-white/25 active:scale-95 transition-all"
+                  className="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs sm:text-sm backdrop-blur-md transition-all hover:scale-105"
                 >
-                  <Info className="w-4 h-4" />
-                  <span>Details & Addons</span>
+                  Details & Episodes
                 </button>
 
                 <button
@@ -547,6 +584,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                         alt={movie.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
                       />
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] font-bold text-amber-300 flex items-center gap-1">
                         <Star className="w-2.5 h-2.5 fill-amber-400" />
@@ -581,7 +624,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
             </div>
           </section>
 
-          {/* RAIL 2: NUVIO CINEMETA LIVE TRENDING (REALTIME API) */}
+          {/* RAIL 2: NUVIO CINEMETA LIVE TRENDING MOVIES */}
           {liveTrendingMovies.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between">
@@ -590,11 +633,11 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                    Nuvio Cinemeta Live Trending
+                    Nuvio Cinemeta Live Trending Movies
                   </h2>
                   <span className="text-[10px] font-mono font-bold text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 flex items-center gap-1 shadow-sm">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-                    LIVE REALTIME API
+                    LIVE REALTIME API ({liveTrendingMovies.length})
                   </span>
                 </div>
 
@@ -630,6 +673,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                         alt={movie.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
                       />
                       <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 backdrop-blur-md">
                         {movie.quality}
@@ -677,6 +726,9 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
                     Binge-Worthy TV Series & Sagas
                   </h2>
+                  <span className="text-[10px] font-mono font-bold text-purple-300 px-2 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40">
+                    {tvSeriesList.length} Series
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -711,6 +763,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                         alt={series.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${series.id}/img`;
+                          }
+                        }}
                       />
                       <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-500/40 backdrop-blur-md">
                         SERIES
@@ -725,78 +783,6 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                         {series.title}
                       </h3>
                       <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                        {series.duration}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* RAIL 4: NUVIO CINEMETA LIVE GLOBAL TV SERIES (REALTIME API) */}
-          {liveSeriesList.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30">
-                    <Tv className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                    Nuvio Cinemeta Live Series
-                  </h2>
-                  <span className="text-[10px] font-mono font-bold text-violet-300 px-2 py-0.5 rounded-full bg-violet-950/80 border border-violet-500/40 flex items-center gap-1 shadow-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-ping" />
-                    LIVE REALTIME API
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => scrollRail('rail-cinemeta-series', 'left')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => scrollRail('rail-cinemeta-series', 'right')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div
-                id="rail-cinemeta-series"
-                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
-              >
-                {liveSeriesList.map((series) => (
-                  <div
-                    key={series.id}
-                    onClick={() => setActiveModalMovie(series)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-violet-500/50 p-2 transition-all uiverse-card"
-                  >
-                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
-                      <img
-                        src={series.posterUrl}
-                        alt={series.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-violet-950/80 text-violet-300 border border-violet-500/40 backdrop-blur-md">
-                        SERIES
-                      </span>
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                        <Star className="w-2.5 h-2.5 fill-amber-400" />
-                        {series.imdbScore}
-                      </div>
-                    </div>
-                    <div className="pt-2">
-                      <h3 className="text-xs font-bold text-white group-hover:text-violet-300 truncate">
-                        {series.title}
-                      </h3>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
                         {series.year} • {series.duration}
                       </p>
                     </div>
@@ -806,135 +792,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
             </section>
           )}
 
-          {/* RAIL 5: PINOY CINEMA CLASSICS & BLOCKBUSTERS */}
-          {pinoyMovies.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                    <Heart className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                    Pinoy Cinema Vault & Star Cinema
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => scrollRail('rail-pinoy', 'left')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => scrollRail('rail-pinoy', 'right')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div
-                id="rail-pinoy"
-                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
-              >
-                {pinoyMovies.map((movie) => (
-                  <div
-                    key={movie.id}
-                    onClick={() => setActiveModalMovie(movie)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-rose-500/50 p-2 transition-all uiverse-card"
-                  >
-                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
-                      <img
-                        src={movie.posterUrl}
-                        alt={movie.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-500/40 backdrop-blur-md">
-                        PINOY
-                      </span>
-                    </div>
-                    <div className="pt-2">
-                      <h3 className="text-xs font-bold text-white group-hover:text-rose-300 truncate">
-                        {movie.title}
-                      </h3>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                        {movie.year} • {movie.director}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* RAIL 4: ANIME UNIVERSE & FANTASY */}
-          {animeHub.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                    Anime Masterpieces & Ghibli Remasters
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => scrollRail('rail-anime', 'left')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => scrollRail('rail-anime', 'right')}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div
-                id="rail-anime"
-                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
-              >
-                {animeHub.map((anime) => (
-                  <div
-                    key={anime.id}
-                    onClick={() => setActiveModalMovie(anime)}
-                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 p-2 transition-all uiverse-card"
-                  >
-                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
-                      <img
-                        src={anime.posterUrl}
-                        alt={anime.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 backdrop-blur-md">
-                        ANIME
-                      </span>
-                    </div>
-                    <div className="pt-2">
-                      <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 truncate">
-                        {anime.title}
-                      </h3>
-                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                        {anime.year} • {anime.quality}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* RAIL 5: ACTION & MARVEL BLOCKBUSTERS */}
+          {/* RAIL 4: ACTION, MARVEL & SCI-FI BLOCKBUSTERS */}
           {actionBlockbusters.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between">
@@ -945,6 +803,9 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
                     Action, Marvel & Sci-Fi Masters
                   </h2>
+                  <span className="text-[10px] font-mono font-bold text-indigo-300 px-2 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-500/40">
+                    {actionBlockbusters.length} Titles
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -979,6 +840,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                         alt={movie.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
                       />
                       <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-950/80 text-indigo-300 border border-indigo-500/40 backdrop-blur-md">
                         {movie.quality}
@@ -997,6 +864,309 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
               </div>
             </section>
           )}
+
+          {/* RAIL 5: ANIME MASTERPIECES & ANIMATION */}
+          {animeHub.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Anime Masterpieces & Animation
+                  </h2>
+                  <span className="text-[10px] font-mono font-bold text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40">
+                    {animeHub.length} Films
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-anime', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-anime', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="rail-anime"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
+              >
+                {animeHub.map((anime) => (
+                  <div
+                    key={anime.id}
+                    onClick={() => setActiveModalMovie(anime)}
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/50 p-2 transition-all uiverse-card"
+                  >
+                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
+                      <img
+                        src={anime.posterUrl}
+                        alt={anime.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${anime.id}/img`;
+                          }
+                        }}
+                      />
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 backdrop-blur-md">
+                        ANIME
+                      </span>
+                    </div>
+                    <div className="pt-2">
+                      <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 truncate">
+                        {anime.title}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                        {anime.year} • {anime.quality}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* RAIL 6: PINOY CINEMA VAULT & STAR CINEMA */}
+          {pinoyMovies.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                    <Heart className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Pinoy Cinema Vault & Star Cinema
+                  </h2>
+                  <span className="text-[10px] font-mono font-bold text-rose-300 px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40">
+                    Pinoy Blockbusters
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-pinoy', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-pinoy', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="rail-pinoy"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
+              >
+                {pinoyMovies.map((movie) => (
+                  <div
+                    key={movie.id}
+                    onClick={() => setActiveModalMovie(movie)}
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-rose-500/50 p-2 transition-all uiverse-card"
+                  >
+                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('media-amazon.com') && !target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
+                      />
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-500/40 backdrop-blur-md">
+                        PINOY
+                      </span>
+                    </div>
+                    <div className="pt-2">
+                      <h3 className="text-xs font-bold text-white group-hover:text-rose-300 truncate">
+                        {movie.title}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                        {movie.year} • {movie.director}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* RAIL 7: FAMILY & COMEDY CINEMA */}
+          {familyOpenCinema.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                    <Star className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Family & Comedy Favorites
+                  </h2>
+                  <span className="text-[10px] font-mono font-bold text-amber-300 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/40">
+                    {familyOpenCinema.length} Films
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-family', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-family', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="rail-family"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
+              >
+                {familyOpenCinema.map((movie) => (
+                  <div
+                    key={movie.id}
+                    onClick={() => setActiveModalMovie(movie)}
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-amber-500/50 p-2 transition-all uiverse-card"
+                  >
+                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
+                      />
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/40 backdrop-blur-md">
+                        FAMILY
+                      </span>
+                    </div>
+                    <div className="pt-2">
+                      <h3 className="text-xs font-bold text-white group-hover:text-amber-300 truncate">
+                        {movie.title}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                        {movie.year} • {movie.duration}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* RAIL 8: DARK HORROR & SUSPENSE NIGHT */}
+          {horrorHub.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30">
+                    <Skull className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Dark Horror & Psychological Suspense
+                  </h2>
+                  <span className="text-[10px] font-mono font-bold text-red-300 px-2 py-0.5 rounded-full bg-red-950/80 border border-red-500/40">
+                    {horrorHub.length} Films
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-horror', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-horror', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="rail-horror"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
+              >
+                {horrorHub.map((movie) => (
+                  <div
+                    key={movie.id}
+                    onClick={() => setActiveModalMovie(movie)}
+                    className="relative flex-shrink-0 w-40 sm:w-48 group cursor-pointer snap-start rounded-2xl bg-slate-900/60 border border-white/5 hover:border-red-500/50 p-2 transition-all uiverse-card"
+                  >
+                    <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-slate-950">
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.src.includes('metahub.space')) {
+                            target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                          }
+                        }}
+                      />
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-red-950/80 text-red-300 border border-red-500/40 backdrop-blur-md">
+                        HORROR
+                      </span>
+                    </div>
+                    <div className="pt-2">
+                      <h3 className="text-xs font-bold text-white group-hover:text-red-300 truncate">
+                        {movie.title}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                        {movie.year} • {movie.duration}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Quick Switch to Full Grid Browse at the Bottom of Rails */}
+          <div className="pt-6 pb-2 text-center">
+            <button
+              onClick={() => setViewMode('grid')}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs inline-flex items-center gap-2 transition hover:scale-105 shadow-lg shadow-cyan-950/40"
+            >
+              <LayoutGrid className="w-4 h-4 text-cyan-400" />
+              <span>Browse All {allCatalogMovies.length} Titles in Poster Grid View</span>
+            </button>
+          </div>
         </div>
       ) : (
         /* GRID MODE OR SEARCH / FILTER RESULTS */
@@ -1015,7 +1185,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 )}
               </h2>
               <span className="text-xs text-slate-500 font-mono">
-                ({filteredMovies.length} Available)
+                ({filteredMovies.length} Streamable)
               </span>
             </div>
           </div>
@@ -1053,6 +1223,12 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                       alt={movie.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                       loading="lazy"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes('metahub.space')) {
+                          target.src = `https://images.metahub.space/poster/medium/${movie.id}/img`;
+                        }
+                      }}
                     />
 
                     {/* Rating Badge */}
@@ -1118,6 +1294,29 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* LOAD MORE TITLES BUTTON (+50 TITLES PAGINATION) */}
+          {selectedCategory === 'all' && !searchQuery.trim() && (
+            <div className="pt-8 pb-8 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center gap-2.5 transition-all shadow-xl shadow-cyan-950/40 hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                    <span>Loading 50 More Real Movies & Series...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                    <span>Load More Movies (+50 Titles)</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>

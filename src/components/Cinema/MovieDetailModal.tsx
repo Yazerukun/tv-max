@@ -20,6 +20,9 @@ import {
 } from 'lucide-react';
 import { CinemaMovie, Episode, StreamServer } from '../../data/cinemaMovies';
 import { getStoredWatchlist, toggleStoredWatchlist } from '../../utils/storage';
+import { resolveRealtimeStreams } from '../../services/aiostreamsService';
+import { fetchRealtimeDetails } from '../../services/nuvioService';
+import { getAIOStreamsConfig } from '../../data/aiostreamsAddons';
 
 interface MovieDetailModalProps {
   movie: CinemaMovie;
@@ -34,6 +37,8 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
   onPlayMovie,
   onWatchlistChanged,
 }) => {
+  const [details, setDetails] = useState<CinemaMovie>(movie);
+  const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number>(() => {
     return movie.seasons && movie.seasons.length > 0 ? movie.seasons[0].seasonNumber : 1;
   });
@@ -41,23 +46,92 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
     return getStoredWatchlist().includes(movie.id);
   });
 
+  // Realtime Live Stream Resolution via AIOStreams Engine
+  const [activeServers, setActiveServers] = useState<StreamServer[]>(() => movie.servers || []);
+  const [isResolvingStreams, setIsResolvingStreams] = useState<boolean>(true);
+  const [streamStatus, setStreamStatus] = useState<string>('Querying AIOStreams scrapers...');
+
+  // 1. Hydrate full metadata from Nuvio Cinemeta API (for full synopsis, cast, and all seasons/episodes)
+  useEffect(() => {
+    let isSubscribed = true;
+    setDetails(movie);
+
+    const hydrateMetadata = async () => {
+      try {
+        setIsLoadingDetails(true);
+        const detailed = await fetchRealtimeDetails(movie.id, movie.type);
+        if (!isSubscribed) return;
+        if (detailed) {
+          setDetails((prev) => ({
+            ...prev,
+            ...detailed,
+            servers: prev.servers && prev.servers.length > 0 ? prev.servers : detailed.servers,
+          }));
+          if (detailed.seasons && detailed.seasons.length > 0) {
+            setSelectedSeasonNumber(detailed.seasons[0].seasonNumber);
+          }
+        }
+      } catch (err) {
+        console.warn('Realtime metadata hydration error:', err);
+      } finally {
+        if (isSubscribed) setIsLoadingDetails(false);
+      }
+    };
+
+    hydrateMetadata();
+    return () => { isSubscribed = false; };
+  }, [movie.id, movie.type]);
+
+  // 2. Resolve live streams via AIOStreams & Torrentio Scraper Engine
+  useEffect(() => {
+    let isSubscribed = true;
+    const fetchStreams = async () => {
+      setIsResolvingStreams(true);
+      try {
+        const config = getAIOStreamsConfig();
+        const result = await resolveRealtimeStreams(movie.id, movie.type, config.realDebridApiKey);
+        if (!isSubscribed) return;
+        if (result.servers && result.servers.length > 0) {
+          setActiveServers(result.servers);
+          setStreamStatus(result.isRealtime ? `Live AIOStreams (${result.latencyMs}ms)` : 'Edge CDN Verified');
+        }
+      } catch (err) {
+        console.warn('Stream resolution error:', err);
+      } finally {
+        if (isSubscribed) setIsResolvingStreams(false);
+      }
+    };
+
+    fetchStreams();
+    return () => { isSubscribed = false; };
+  }, [movie.id, movie.type]);
+
   const handleToggleWatchlist = () => {
-    const updated = toggleStoredWatchlist(movie.id);
-    setIsInWatchlist(updated.includes(movie.id));
+    const updated = toggleStoredWatchlist(details.id);
+    setIsInWatchlist(updated.includes(details.id));
     onWatchlistChanged?.();
   };
 
-  const selectedSeason = movie.seasons?.find(s => s.seasonNumber === selectedSeasonNumber);
+  const selectedSeason = details.seasons?.find(s => s.seasonNumber === selectedSeasonNumber);
 
   // Play movie specifically on a chosen server mirror
   const handlePlayOnServer = (srv: StreamServer) => {
     const customMovie: CinemaMovie = {
-      ...movie,
+      ...details,
       streamUrl: srv.url,
       // Put selected server first so player activates it immediately
-      servers: [srv, ...movie.servers.filter(s => s.id !== srv.id)]
+      servers: [srv, ...activeServers.filter(s => s.id !== srv.id)]
     };
     onPlayMovie(customMovie);
+  };
+
+  const handlePrimaryPlay = (episode?: Episode) => {
+    const preparedMovie: CinemaMovie = {
+      ...details,
+      servers: activeServers,
+      streamUrl: activeServers[0]?.url || details.streamUrl,
+    };
+    onPlayMovie(preparedMovie, episode);
   };
 
   return (
@@ -69,8 +143,8 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
         {/* Backdrop Image Header */}
         <div className="relative h-64 md:h-84 w-full overflow-hidden shrink-0">
           <img 
-            src={movie.backdropUrl} 
-            alt={movie.title}
+            src={details.backdropUrl} 
+            alt={details.title}
             className="w-full h-full object-cover filter brightness-60 scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#090b11] via-[#090b11]/50 to-transparent" />
@@ -90,29 +164,34 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 shadow">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                {movie.imdbScore} IMDb
+                {details.imdbScore} IMDb
               </span>
               <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow">
-                {movie.quality}
+                {details.quality}
               </span>
-              {movie.type === 'series' && (
+              {details.type === 'series' && (
                 <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-500/40 shadow">
                   TV SERIES
                 </span>
               )}
               <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-slate-200">
-                {movie.year}
+                {details.year}
               </span>
               <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-slate-200">
-                {movie.rating}
+                {details.rating}
               </span>
               <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-slate-200">
-                {movie.duration}
+                {details.duration}
               </span>
+              {isLoadingDetails && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                  Syncing Nuvio Metadata...
+                </span>
+              )}
             </div>
 
             <h1 className="text-2xl md:text-4xl font-black text-white font-sans tracking-tight drop-shadow-md">
-              {movie.title}
+              {details.title}
             </h1>
           </div>
         </div>
@@ -123,12 +202,12 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => onPlayMovie(movie)}
+                onClick={() => handlePrimaryPlay()}
                 className="uiverse-glow-btn group"
               >
                 <div className="uiverse-glow-btn-inner !bg-gradient-to-r !from-cyan-400 !to-sky-400 !text-black font-black">
                   <Play className="w-4 h-4 fill-black" />
-                  <span>{movie.type === 'series' ? 'Play Episode 1' : 'Play Cinema Movie'}</span>
+                  <span>{details.type === 'series' ? 'Play Episode 1' : 'Play Cinema Movie'}</span>
                 </div>
               </button>
 
@@ -154,7 +233,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
               </button>
 
               <div className="flex flex-wrap gap-1.5 ml-auto">
-                {movie.genres.map((g) => (
+                {details.genres.map((g) => (
                   <span key={g} className="px-2.5 py-1 rounded-xl text-xs bg-white/5 border border-white/5 text-slate-300 font-medium">
                     {g}
                   </span>
@@ -163,7 +242,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed">
-              {movie.synopsis}
+              {details.synopsis}
             </p>
           </div>
 
@@ -171,11 +250,11 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 text-xs">
             <div>
               <span className="text-slate-400 font-semibold block mb-1">Director:</span>
-              <span className="text-white font-medium">{movie.director}</span>
+              <span className="text-white font-medium">{details.director}</span>
             </div>
             <div>
               <span className="text-slate-400 font-semibold block mb-1">Starring Cast:</span>
-              <span className="text-white font-medium">{movie.cast.join(', ')}</span>
+              <span className="text-white font-medium">{details.cast.join(', ')}</span>
             </div>
           </div>
 
@@ -184,15 +263,16 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-white">
                 <Layers className="w-4 h-4 text-cyan-400" />
-                AIOStreams Multi-Provider Mirrors ({movie.servers.length} Streams Available)
+                AIOStreams Multi-Provider Mirrors ({activeServers.length} Streams Available)
               </div>
-              <span className="text-[11px] text-emerald-400 font-mono flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Auto-Failover Enabled
+              <span className="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />
+                {streamStatus}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {movie.servers.map((srv, idx) => (
+              {activeServers.map((srv, idx) => (
                 <div 
                   key={srv.id}
                   className="p-3 rounded-2xl bg-slate-900/70 border border-white/5 hover:border-cyan-500/40 transition-all flex items-center justify-between group"
@@ -226,7 +306,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
           </div>
 
           {/* TV SERIES SEASONS & EPISODES (Nuvio Feature) */}
-          {movie.type === 'series' && movie.seasons && (
+          {details.type === 'series' && details.seasons && (
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-white">
@@ -235,9 +315,9 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
                 </div>
 
                 {/* Season Selector */}
-                {movie.seasons.length > 1 && (
+                {details.seasons.length > 1 && (
                   <div className="flex items-center gap-1">
-                    {movie.seasons.map((s) => (
+                    {details.seasons.map((s) => (
                       <button
                         key={s.seasonNumber}
                         onClick={() => setSelectedSeasonNumber(s.seasonNumber)}
@@ -260,7 +340,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
                   {selectedSeason.episodes.map((ep) => (
                     <div
                       key={ep.id}
-                      onClick={() => onPlayMovie(movie, ep)}
+                      onClick={() => handlePrimaryPlay(ep)}
                       className="group p-3.5 rounded-2xl bg-white/5 hover:bg-slate-800/80 border border-white/5 hover:border-purple-500/40 flex items-center justify-between cursor-pointer transition-all"
                     >
                       <div className="flex items-center gap-3">

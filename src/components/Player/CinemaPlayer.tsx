@@ -79,7 +79,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
             id: 'srv-default',
             name: 'AIO Default Stream',
             url: movie.streamUrl,
-            type: movie.streamUrl.includes('.m3u8') ? 'hls' : 'mp4',
+            type: /vidsrc|multiembed|2embed|embed|autoembed|player|youtube/i.test(movie.streamUrl) ? 'embed' : (movie.streamUrl.includes('.m3u8') ? 'hls' : 'mp4'),
             quality: movie.quality,
             provider: 'AIOStreams',
           },
@@ -96,10 +96,11 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
   const activeServer = availableServers[currentServerIndex] || availableServers[0];
   const activeStreamUrl = activeServer.url;
 
-  // Detect whether the URL is a Web Embed (e.g. YouTube, Vimeo)
+  // Detect whether the URL is a Web Embed (e.g. VidSrc, MultiEmbed, 2Embed, YouTube)
   const isEmbedStream = useMemo(() => {
-    return /youtube(-nocookie)?\.com|youtu\.be|dailymotion\.com|vimeo\.com/i.test(activeStreamUrl);
-  }, [activeStreamUrl]);
+    if (activeServer?.type === 'embed') return true;
+    return /vidsrc|multiembed|2embed|embed|autoembed|player|youtube(-nocookie)?\.com|youtu\.be|dailymotion\.com|vimeo\.com/i.test(activeStreamUrl);
+  }, [activeServer, activeStreamUrl]);
 
   // Clean Embed URL with unmuted autoplay parameters
   const normalizeEmbedUrl = (url: string): string => {
@@ -360,9 +361,11 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
       <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         {isEmbedStream ? (
           <iframe
+            key={activeStreamUrl}
             src={normalizeEmbedUrl(activeStreamUrl)}
-            className="w-full h-full border-0"
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            className="w-full h-full border-0 bg-black"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
             title={movie.title}
           />
         ) : (

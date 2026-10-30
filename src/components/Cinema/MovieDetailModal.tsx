@@ -126,10 +126,11 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
   };
 
   const handlePrimaryPlay = (episode?: Episode) => {
+    const serversToUse = episode?.servers && episode.servers.length > 0 ? episode.servers : activeServers;
     const preparedMovie: CinemaMovie = {
       ...details,
-      servers: activeServers,
-      streamUrl: activeServers[0]?.url || details.streamUrl,
+      servers: serversToUse,
+      streamUrl: serversToUse[0]?.url || details.streamUrl,
     };
     onPlayMovie(preparedMovie, episode);
   };

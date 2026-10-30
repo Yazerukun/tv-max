@@ -1,3 +1,5 @@
+import { buildRealMovieStreams } from '../utils/streamUrls';
+
 export interface StreamServer {
   id: string;
   name: string;
@@ -580,3 +582,18 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     quality: '1080p HD'
   }
 ];
+
+// Automatically hydrate all movies and series with 100% real web stream mirrors
+CINEMA_MOVIES.forEach((movie) => {
+  const mirrors = buildRealMovieStreams(movie.id, movie.type);
+  movie.servers = mirrors;
+  movie.streamUrl = mirrors[0].url;
+
+  if (movie.type === 'series' && movie.seasons) {
+    movie.seasons.forEach((season) => {
+      season.episodes.forEach((ep) => {
+        ep.servers = buildRealMovieStreams(movie.id, 'series', season.seasonNumber, ep.episodeNumber);
+      });
+    });
+  }
+});

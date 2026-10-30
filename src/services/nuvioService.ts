@@ -1,5 +1,6 @@
 // Nuvio Media Live Realtime Metadata Service (Cinemeta & TMDB API)
 import { CinemaMovie, Season, Episode, StreamServer } from '../data/cinemaMovies';
+import { buildRealMovieStreams } from '../utils/streamUrls';
 
 const CINEMETA_BASE = 'https://v3-cinemeta.strem.io';
 
@@ -50,30 +51,7 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
         duration: item.runtime || '45m',
         overview: vid.overview || `Season ${vid.season}, Episode ${vid.episode} of ${item.name}`,
         thumbnail: vid.thumbnail || backdrop,
-        servers: [
-          {
-            id: `srv-${vid.id}-1`,
-            name: `[AIO Torrentio] 1080p S${vid.season}E${vid.episode}`,
-            url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-            type: 'hls',
-            quality: '1080p',
-            provider: 'Torrentio',
-            speed: '45 MB/s',
-            latency: '18ms',
-            isVerified: true
-          },
-          {
-            id: `srv-${vid.id}-2`,
-            name: `[AIO MediaFusion] Direct CDN`,
-            url: 'https://vjs.zencdn.net/v/oceans.mp4',
-            type: 'mp4',
-            quality: '1080p',
-            provider: 'MediaFusion',
-            speed: '30 MB/s',
-            latency: '24ms',
-            isVerified: true
-          }
-        ]
+        servers: buildRealMovieStreams(item.id, 'series', vid.season, vid.episode)
       };
       if (!seasonsMap.has(vid.season)) {
         seasonsMap.set(vid.season, []);
@@ -92,6 +70,8 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
   const directorString = Array.isArray(item.director) ? item.director.join(', ') : item.director || 'Cinemeta Director';
   const genresArray = Array.isArray(item.genres) && item.genres.length > 0 ? item.genres : ['Action', 'Drama'];
 
+  const realServers = buildRealMovieStreams(item.id, isSeries ? 'series' : 'movie');
+
   return {
     id: item.id,
     title: item.name,
@@ -107,42 +87,8 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
     synopsis: item.description || `${item.name} (${yearNumber}) is an acclaimed ${genresArray.join(', ')} title.`,
     director: directorString,
     cast: castArray.length > 0 ? castArray : ['Leading Cast'],
-    streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-    servers: [
-      {
-        id: `srv-${item.id}-1`,
-        name: '[AIO Torrentio] 4K HDR 2160p Remux',
-        url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-        type: 'hls',
-        quality: '4K HDR',
-        provider: 'Torrentio',
-        speed: '55 MB/s',
-        latency: '18ms',
-        isVerified: true
-      },
-      {
-        id: `srv-${item.id}-2`,
-        name: '[AIO MediaFusion] 1080p FHD 60fps',
-        url: 'https://vjs.zencdn.net/v/oceans.mp4',
-        type: 'mp4',
-        quality: '1080p',
-        provider: 'MediaFusion',
-        speed: '35 MB/s',
-        latency: '22ms',
-        isVerified: true
-      },
-      {
-        id: `srv-${item.id}-3`,
-        name: '[AIO Nuvio Edge] Direct CDN',
-        url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
-        type: 'hls',
-        quality: '1080p',
-        provider: 'Nuvio VIP',
-        speed: '60 MB/s',
-        latency: '12ms',
-        isVerified: true
-      }
-    ],
+    streamUrl: realServers[0].url,
+    servers: realServers,
     seasons,
     quality: ratingNumber >= 8.0 ? '4K HDR' : '1080p HD',
     isFeatured: ratingNumber >= 8.2

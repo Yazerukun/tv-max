@@ -103,6 +103,19 @@ export function buildRealMovieStreams(
       speed: '55 MB/s',
       latency: '22ms',
       isVerified: true
+    },
+    {
+      id: `aio-autoembed-${id}-${season}-${episode}`,
+      name: '[AIO AutoEmbed 5] Fast CDN Streaming',
+      url: isSeries
+        ? `https://autoembed.co/tv/imdb/${id}-${season}-${episode}`
+        : `https://autoembed.co/movie/imdb/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'AutoEmbed CDN',
+      speed: '75 MB/s',
+      latency: '14ms',
+      isVerified: true
     }
   ];
 }

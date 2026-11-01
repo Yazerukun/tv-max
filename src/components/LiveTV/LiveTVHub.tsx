@@ -51,28 +51,51 @@ function sendYouTubeCommand(iframe: HTMLIFrameElement | null, func: string, args
 function formatLiveStreamUrl(url: string): string {
   const stealthParams = 'autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1';
   
-  if (url.includes('youtube.com/watch?v=') || url.includes('youtube-nocookie.com/watch?v=')) {
+  // 1. Direct watch query v=
+  if (url.includes('v=')) {
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (videoId) {
       return `https://www.youtube-nocookie.com/embed/${videoId}?${stealthParams}`;
     }
   }
+
+  // 2. Short youtu.be format
   if (url.includes('youtu.be/')) {
     const videoId = url.split('youtu.be/')[1]?.split('?')[0];
     if (videoId) {
       return `https://www.youtube-nocookie.com/embed/${videoId}?${stealthParams}`;
     }
   }
-  if (url.includes('/embed/')) {
-    const base = url.split('?')[0];
-    return `${base}?${stealthParams}`;
+
+  // 3. Existing embed with video ID
+  if (url.includes('/embed/') && !url.includes('/embed/live_stream')) {
+    const videoId = url.split('/embed/')[1]?.split('?')[0];
+    if (videoId) {
+      return `https://www.youtube-nocookie.com/embed/${videoId}?${stealthParams}`;
+    }
   }
-  if (url.includes('youtube.com/channel/') && url.includes('/live')) {
-    const channelId = url.split('channel/')[1]?.split('/')[0];
+
+  // 4. Channel stream query or path
+  if (url.includes('channel=')) {
+    const channelId = url.split('channel=')[1]?.split('&')[0];
     if (channelId) {
+      if (channelId === 'UCKL5hAuzgFQsyrsQKgU0Qng') {
+        return `https://www.youtube-nocookie.com/embed/gs0CRn0eRd0?${stealthParams}`;
+      }
       return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&${stealthParams}`;
     }
   }
+
+  if (url.includes('youtube.com/channel/') || url.includes('youtube-nocookie.com/channel/')) {
+    const channelId = url.split('channel/')[1]?.split('/')[0];
+    if (channelId) {
+      if (channelId === 'UCKL5hAuzgFQsyrsQKgU0Qng') {
+        return `https://www.youtube-nocookie.com/embed/gs0CRn0eRd0?${stealthParams}`;
+      }
+      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&${stealthParams}`;
+    }
+  }
+
   return url;
 }
 

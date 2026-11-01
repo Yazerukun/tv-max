@@ -31,7 +31,7 @@ export const LIVE_TV_CHANNELS: LiveChannel[] = [
     name: 'GMA Network (Kapuso Stream)',
     category: 'pinoy',
     logo: 'https://yt3.googleusercontent.com/_ZJZCMxEI1PZW3WHr4-lvvq2cua4oKcLAtXET1ecklKeTMRoqBDHTp3hHshe3rozByRxwOb5SA=s900-c-k-c0x00ffffff-no-rj',
-    streamUrl: 'https://www.youtube-nocookie.com/embed/live_stream?channel=UCKL5hAuzgFQsyrsQKgU0Qng&autoplay=1',
+    streamUrl: 'https://www.youtube.com/watch?v=gs0CRn0eRd0',
     streamType: 'youtube',
     quality: '1080p HD',
     country: 'PH',

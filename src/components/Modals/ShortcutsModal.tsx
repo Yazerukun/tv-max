@@ -10,14 +10,16 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
   if (!isOpen) return null;
 
   const shortcuts = [
+    { key: '⌘K / Ctrl+K', desc: 'Universal Spotlight Search (All 6 Hubs)' },
+    { key: 'T', desc: 'Toggle 10-Foot Smart TV Spatial Nav Mode' },
     { key: 'Space', desc: 'Play / Pause playback' },
     { key: '← / →', desc: 'Seek backward / forward (10s)' },
-    { key: '↑ / ↓', desc: 'Volume up / down (5%)' },
+    { key: '↑ / ↓', desc: 'Volume up / down (5%) or Spatial Nav' },
     { key: 'F', desc: 'Toggle Fullscreen Cinema mode' },
     { key: 'S', desc: 'Cycle AIOStreams Server Mirrors' },
     { key: 'M', desc: 'Mute / Unmute audio' },
     { key: 'G', desc: 'Toggle Dynamic Ambient Glow' },
-    { key: '/', desc: 'Quick focus Search Bar' },
+    { key: 'Gamepad A / B', desc: 'Select (Enter) / Go Back (Escape)' },
     { key: 'Esc', desc: 'Back to Catalog / Close Modal' },
   ];
 

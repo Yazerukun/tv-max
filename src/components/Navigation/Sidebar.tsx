@@ -14,7 +14,11 @@ import {
   Layers,
   Zap,
   Flame,
-  Radio
+  Radio,
+  Search,
+  RotateCcw,
+  Monitor,
+  Download
 } from 'lucide-react';
 import { NavMode } from '../../utils/storage';
 
@@ -22,10 +26,17 @@ interface SidebarProps {
   navMode: NavMode;
   onSelectNavMode: (mode: NavMode) => void;
   watchlistCount: number;
+  continueWatchingCount?: number;
   onOpenAIOStreams: () => void;
   onOpenShortcutsModal: () => void;
+  onOpenSpotlight: () => void;
+  onOpenContinueWatching: () => void;
   onSelectCategory: (category: string) => void;
   selectedCategory: string;
+  isTvMode?: boolean;
+  onToggleTvMode?: () => void;
+  isInstallable?: boolean;
+  onInstallApp?: () => void;
 }
 
 interface NavItem {
@@ -115,10 +126,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   navMode,
   onSelectNavMode,
   watchlistCount,
+  continueWatchingCount = 0,
   onOpenAIOStreams,
   onOpenShortcutsModal,
+  onOpenSpotlight,
+  onOpenContinueWatching,
   onSelectCategory,
   selectedCategory,
+  isTvMode = false,
+  onToggleTvMode,
+  isInstallable = false,
+  onInstallApp,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
@@ -166,15 +184,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition"
           title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          data-nav="true"
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 
       {/* 2. Primary 6 Entertainment Hubs Navigation */}
-      <div className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto scrollbar-none">
+      <div className="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto scrollbar-none">
+        {/* Spotlight Search Launcher */}
+        <button
+          onClick={onOpenSpotlight}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold transition mb-2 shadow-sm ${
+            isCollapsed ? 'justify-center px-0' : ''
+          }`}
+          title="Universal Spotlight Search (⌘K / Ctrl+K)"
+          data-nav="true"
+        >
+          <Search className="w-4 h-4 text-cyan-400 flex-shrink-0 animate-pulse" />
+          {!isCollapsed && (
+            <div className="flex-1 flex items-center justify-between text-left text-xs">
+              <span>Spotlight Search</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-black/40 text-[9px] font-mono text-cyan-300 border border-cyan-500/30">
+                ⌘K
+              </kbd>
+            </div>
+          )}
+        </button>
+
         {!isCollapsed && (
-          <div className="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+          <div className="px-3 pb-1 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
             Entertainment Hubs (6)
           </div>
         )}
@@ -187,6 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => onSelectNavMode(item.id)}
+              data-nav="true"
               className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-2xl font-bold transition-all duration-200 group relative ${
                 isActive
                   ? `bg-gradient-to-r ${item.activeGradient} text-white shadow-lg ${item.glowColor} scale-[1.02]`
@@ -247,14 +287,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      {/* 3. Bottom Section: Watchlist, AIO Addons, Shortcuts */}
+      {/* 3. Bottom Section: Continue Watching, Watchlist, TV Mode, AIO Addons, Shortcuts */}
       <div className="p-3 border-t border-white/10 bg-[#04060e] space-y-1 flex-shrink-0">
+        {/* Continue Watching */}
+        <button
+          onClick={onOpenContinueWatching}
+          data-nav="true"
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition ${
+            isCollapsed ? 'justify-center px-0' : ''
+          }`}
+          title="Continue Watching (Resume Playback)"
+        >
+          <RotateCcw className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+          {!isCollapsed && (
+            <div className="flex-1 flex items-center justify-between text-left">
+              <span>Continue Watching</span>
+              {continueWatchingCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black bg-cyan-500/20 text-cyan-300">
+                  {continueWatchingCount}
+                </span>
+              )}
+            </div>
+          )}
+        </button>
+
         {/* Watchlist */}
         <button
           onClick={() => {
             onSelectNavMode('cinema');
             onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist');
           }}
+          data-nav="true"
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition ${
             selectedCategory === 'watchlist' && navMode === 'cinema'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
@@ -275,9 +338,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </button>
 
+        {/* Smart TV / 10-Foot Spatial Nav Mode */}
+        {onToggleTvMode && (
+          <button
+            onClick={onToggleTvMode}
+            data-nav="true"
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition ${
+              isTvMode
+                ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            } ${isCollapsed ? 'justify-center px-0' : ''}`}
+            title="Toggle Smart TV 10-Foot Remote Navigation (Key: T)"
+          >
+            <Monitor className={`w-4 h-4 flex-shrink-0 ${isTvMode ? 'text-purple-400' : 'text-slate-400'}`} />
+            {!isCollapsed && (
+              <div className="flex-1 flex items-center justify-between text-left">
+                <span>10-Foot TV Mode</span>
+                <span className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-bold ${
+                  isTvMode ? 'bg-purple-500 text-black' : 'bg-white/10 text-slate-400'
+                }`}>
+                  {isTvMode ? 'ACTIVE' : 'OFF'}
+                </span>
+              </div>
+            )}
+          </button>
+        )}
+
+        {/* Install PWA App */}
+        {isInstallable && onInstallApp && (
+          <button
+            onClick={onInstallApp}
+            data-nav="true"
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 transition ${
+              isCollapsed ? 'justify-center px-0' : ''
+            }`}
+            title="Install TV-MAX Desktop / Mobile App"
+          >
+            <Download className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-bounce" />
+            {!isCollapsed && <span>Install TV-MAX</span>}
+          </button>
+        )}
+
         {/* AIOStreams Addons */}
         <button
           onClick={onOpenAIOStreams}
+          data-nav="true"
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition ${
             isCollapsed ? 'justify-center px-0' : ''
           }`}
@@ -290,6 +395,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Remote & Keyboard Shortcuts */}
         <button
           onClick={onOpenShortcutsModal}
+          data-nav="true"
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition ${
             isCollapsed ? 'justify-center px-0' : ''
           }`}
@@ -302,3 +408,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
+

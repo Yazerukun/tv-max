@@ -6,15 +6,18 @@ import {
   Keyboard, 
   X, 
   Film, 
-  Sparkles,
-  Bookmark,
-  SlidersHorizontal,
-  LayoutGrid,
-  Rows,
-  Zap,
-  BookOpen,
-  Compass,
-  Clapperboard
+  Sparkles, 
+  Bookmark, 
+  SlidersHorizontal, 
+  LayoutGrid, 
+  Rows, 
+  Zap, 
+  BookOpen, 
+  Compass, 
+  Clapperboard,
+  RotateCcw,
+  Download,
+  Monitor
 } from 'lucide-react';
 import { NavMode } from '../../utils/storage';
 
@@ -26,6 +29,13 @@ interface NavbarProps {
   onSelectCategory: (category: string) => void;
   selectedCategory: string;
   watchlistCount: number;
+  continueWatchingCount?: number;
+  onOpenContinueWatching?: () => void;
+  onOpenSpotlight?: () => void;
+  isTvMode?: boolean;
+  onToggleTvMode?: () => void;
+  isInstallable?: boolean;
+  onInstallApp?: () => void;
   viewMode: 'rails' | 'grid';
   onToggleViewMode: () => void;
   navMode: NavMode;
@@ -40,6 +50,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectCategory,
   selectedCategory,
   watchlistCount,
+  continueWatchingCount = 0,
+  onOpenContinueWatching,
+  onOpenSpotlight,
+  isTvMode = false,
+  onToggleTvMode,
+  isInstallable = false,
+  onInstallApp,
   viewMode,
   onToggleViewMode,
   navMode,
@@ -187,19 +204,29 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* 2. Center: Uiverse Glow Focus Search Input */}
       <div className="flex-1 max-w-md hidden md:block">
         <div className="uiverse-input-wrapper">
-          <div className="relative bg-[#070913]/90 rounded-[calc(1rem-1px)]">
+          <div className="relative bg-[#070913]/90 rounded-[calc(1rem-1px)] flex items-center">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
             <input
               type="text"
-              placeholder="Quick search movies, series, cast, or genres..."
+              placeholder="Quick search or press ⌘K..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-9 py-2 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none"
+              className="w-full pl-10 pr-16 py-2 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none"
             />
+            {onOpenSpotlight && (
+              <button
+                type="button"
+                onClick={onOpenSpotlight}
+                className="absolute right-2 px-1.5 py-0.5 rounded bg-white/10 hover:bg-cyan-500 hover:text-black text-[10px] font-mono text-cyan-300 border border-white/10 transition"
+                title="Open Universal Spotlight Search (⌘K)"
+              >
+                ⌘K
+              </button>
+            )}
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -210,6 +237,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* 3. Right: Navigation Actions & Addons */}
       <div className="flex items-center gap-2">
+        {/* Continue Watching Pill */}
+        {onOpenContinueWatching && (
+          <button
+            onClick={onOpenContinueWatching}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-slate-300 hover:text-cyan-300 text-xs font-bold transition-all"
+            title="Continue Watching"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden lg:inline">Resume</span>
+            {continueWatchingCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black bg-cyan-500/20 text-cyan-300">
+                {continueWatchingCount}
+              </span>
+            )}
+          </button>
+        )}
+
         {/* Watchlist Quick Pill */}
         <button
           onClick={() => onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist')}
@@ -230,6 +274,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           )}
         </button>
+
+        {/* Install PWA App Button */}
+        {isInstallable && onInstallApp && (
+          <button
+            onClick={onInstallApp}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition-all"
+            title="Install TV-MAX Desktop / Mobile App"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Install</span>
+          </button>
+        )}
+
+        {/* TV Mode Toggle */}
+        {onToggleTvMode && (
+          <button
+            onClick={onToggleTvMode}
+            className={`p-2 rounded-xl border text-xs font-semibold transition ${
+              isTvMode
+                ? 'bg-purple-600/30 text-purple-300 border-purple-500/50 shadow'
+                : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-400 hover:text-white'
+            }`}
+            title="Toggle 10-Foot Smart TV Navigation (T)"
+          >
+            <Monitor className="w-4 h-4" />
+          </button>
+        )}
 
         {/* View Mode Switcher (Rails vs Grid) */}
         <button

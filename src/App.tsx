@@ -8,8 +8,11 @@ import { AnimeHub } from './components/Anime/AnimeHub';
 import { MangaHub } from './components/Manga/MangaHub';
 import { ReelShortHub } from './components/ReelShort/ReelShortHub';
 import { CinemaPlayer } from './components/Player/CinemaPlayer';
+import { FloatingMiniPlayer } from './components/Player/FloatingMiniPlayer';
 import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
+import { ContinueWatchingModal } from './components/Modals/ContinueWatchingModal';
+import { SpotlightSearchModal } from './components/Modals/SpotlightSearchModal';
 import { CinemaMovie, Episode } from './data/cinemaMovies';
 import { 
   getStoredPlayerSettings, 
@@ -20,8 +23,12 @@ import {
   saveStoredViewMode,
   getStoredNavMode,
   saveStoredNavMode,
+  getStoredWatchProgress,
+  WatchProgress,
   NavMode
 } from './utils/storage';
+import { useSpatialNav } from './utils/useSpatialNav';
+import { usePWA } from './utils/usePWA';
 
 export const App: React.FC = () => {
   // Navigation Mode (Cinema / Movies vs Dedicated Free Live TV Hub vs Dedicated Anime Hub)
@@ -30,6 +37,13 @@ export const App: React.FC = () => {
   // Currently streaming movie / episode state
   const [activeMovie, setActiveMovie] = useState<CinemaMovie | null>(null);
   const [activeEpisode, setActiveEpisode] = useState<Episode | undefined>(undefined);
+
+  // Picture-in-Picture Floating Mini-Player state
+  const [miniPlayerMovie, setMiniPlayerMovie] = useState<CinemaMovie | null>(null);
+  const [miniPlayerEpisode, setMiniPlayerEpisode] = useState<Episode | undefined>(undefined);
+
+  // Continue Watching list state
+  const [watchProgressList, setWatchProgressList] = useState<WatchProgress[]>(() => getStoredWatchProgress());
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -42,19 +56,41 @@ export const App: React.FC = () => {
   // Modals
   const [isAIOStreamsOpen, setIsAIOStreamsOpen] = useState<boolean>(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
+  const [isContinueWatchingOpen, setIsContinueWatchingOpen] = useState<boolean>(false);
+  const [isSpotlightOpen, setIsSpotlightOpen] = useState<boolean>(false);
 
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)
   const [playerSettings, setPlayerSettings] = useState<PlayerSettings>(() => getStoredPlayerSettings());
 
+  // Smart TV 10-Foot Spatial Nav Hook
+  const { isTvMode, toggleTvMode } = useSpatialNav();
+
+  // PWA Standalone Install Hook
+  const { isInstallable, installApp } = usePWA();
+
+  // Sync Continue Watching progress on window focus or storage update
+  useEffect(() => {
+    const refresh = () => setWatchProgressList(getStoredWatchProgress());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
   const handleSelectNavMode = useCallback((mode: NavMode) => {
     setNavMode(mode);
     saveStoredNavMode(mode);
+    // If active movie was playing, dock it into the floating mini-player instead of killing it
     if (activeMovie) {
+      setMiniPlayerMovie(activeMovie);
+      setMiniPlayerEpisode(activeEpisode);
       setActiveMovie(null);
       setActiveEpisode(undefined);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeMovie]);
+  }, [activeMovie, activeEpisode]);
 
   const handleUpdateSettings = useCallback((updated: Partial<PlayerSettings>) => {
     setPlayerSettings((prev) => {
@@ -75,24 +111,62 @@ export const App: React.FC = () => {
   const handlePlayMovie = useCallback((movie: CinemaMovie, episode?: Episode) => {
     setActiveMovie(movie);
     setActiveEpisode(episode);
+    setMiniPlayerMovie(null);
+    setMiniPlayerEpisode(undefined);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleBackToCatalog = useCallback(() => {
     setActiveMovie(null);
     setActiveEpisode(undefined);
+    setWatchProgressList(getStoredWatchProgress());
   }, []);
 
-  // Global Keyboard Navigation
+  const handleMinimizeToMiniPlayer = useCallback(() => {
+    if (activeMovie) {
+      setMiniPlayerMovie(activeMovie);
+      setMiniPlayerEpisode(activeEpisode);
+      setActiveMovie(null);
+      setActiveEpisode(undefined);
+    }
+  }, [activeMovie, activeEpisode]);
+
+  const handleExpandMiniPlayer = useCallback(() => {
+    if (miniPlayerMovie) {
+      setActiveMovie(miniPlayerMovie);
+      setActiveEpisode(miniPlayerEpisode);
+      setMiniPlayerMovie(null);
+      setMiniPlayerEpisode(undefined);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [miniPlayerMovie, miniPlayerEpisode]);
+
+  const handleCloseMiniPlayer = useCallback(() => {
+    setMiniPlayerMovie(null);
+    setMiniPlayerEpisode(undefined);
+  }, []);
+
+  // Global Keyboard Navigation (Cmd+K, Shortcuts, Escape)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+K or Ctrl+K for Universal Spotlight Search
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsSpotlightOpen((prev) => !prev);
+        return;
+      }
+
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
 
       switch (e.key) {
         case 'Escape':
-          if (isAIOStreamsOpen) {
+          if (isSpotlightOpen) {
+            setIsSpotlightOpen(false);
+          } else if (isContinueWatchingOpen) {
+            setIsContinueWatchingOpen(false);
+          } else if (isAIOStreamsOpen) {
             setIsAIOStreamsOpen(false);
           } else if (isShortcutsOpen) {
             setIsShortcutsOpen(false);
@@ -109,8 +183,7 @@ export const App: React.FC = () => {
           break;
         case '/':
           e.preventDefault();
-          const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-          searchInput?.focus();
+          setIsSpotlightOpen(true);
           break;
         case 'g':
         case 'G':
@@ -127,7 +200,16 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeMovie, isAIOStreamsOpen, isShortcutsOpen, playerSettings, handleBackToCatalog, handleUpdateSettings]);
+  }, [
+    activeMovie, 
+    isSpotlightOpen, 
+    isContinueWatchingOpen, 
+    isAIOStreamsOpen, 
+    isShortcutsOpen, 
+    playerSettings, 
+    handleBackToCatalog, 
+    handleUpdateSettings
+  ]);
 
   // Keep watchlist count in sync
   const refreshWatchlistCount = () => {
@@ -142,13 +224,20 @@ export const App: React.FC = () => {
           navMode={navMode}
           onSelectNavMode={handleSelectNavMode}
           watchlistCount={watchlistCount}
+          continueWatchingCount={watchProgressList.length}
           onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
+          onOpenSpotlight={() => setIsSpotlightOpen(true)}
+          onOpenContinueWatching={() => setIsContinueWatchingOpen(true)}
           onSelectCategory={(cat) => {
             setSelectedCategory(cat);
             refreshWatchlistCount();
           }}
           selectedCategory={selectedCategory}
+          isTvMode={isTvMode}
+          onToggleTvMode={toggleTvMode}
+          isInstallable={isInstallable}
+          onInstallApp={installApp}
         />
       )}
 
@@ -161,6 +250,13 @@ export const App: React.FC = () => {
             onSearchChange={setSearchQuery}
             onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
             onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
+            onOpenSpotlight={() => setIsSpotlightOpen(true)}
+            onOpenContinueWatching={() => setIsContinueWatchingOpen(true)}
+            continueWatchingCount={watchProgressList.length}
+            isTvMode={isTvMode}
+            onToggleTvMode={toggleTvMode}
+            isInstallable={isInstallable}
+            onInstallApp={installApp}
             onSelectCategory={(cat) => {
               setSelectedCategory(cat);
               if (activeMovie) setActiveMovie(null);
@@ -185,6 +281,7 @@ export const App: React.FC = () => {
               onSelectEpisode={(ep) => setActiveEpisode(ep)}
               settings={playerSettings}
               onUpdateSettings={handleUpdateSettings}
+              onMinimizeToMiniPlayer={handleMinimizeToMiniPlayer}
             />
           ) : navMode === 'livetv' ? (
             <LiveTVHub onBackToCinema={() => handleSelectNavMode('cinema')} />
@@ -240,13 +337,40 @@ export const App: React.FC = () => {
         )}
       </div>
 
-      {/* 4. AIOStreams Super-Addon Aggregator Modal */}
+      {/* 4. Floating Picture-in-Picture Mini-Player (Shows while browsing other hubs) */}
+      {miniPlayerMovie && !activeMovie && (
+        <FloatingMiniPlayer
+          movie={miniPlayerMovie}
+          activeEpisode={miniPlayerEpisode}
+          onExpand={handleExpandMiniPlayer}
+          onClose={handleCloseMiniPlayer}
+        />
+      )}
+
+      {/* 5. Universal Spotlight Search Modal (Cmd+K / Ctrl+K) */}
+      <SpotlightSearchModal
+        isOpen={isSpotlightOpen}
+        onClose={() => setIsSpotlightOpen(false)}
+        onSelectMovie={handlePlayMovie}
+        onNavigateHub={handleSelectNavMode}
+      />
+
+      {/* 6. Continue Watching & Progress Resume Modal */}
+      <ContinueWatchingModal
+        isOpen={isContinueWatchingOpen}
+        onClose={() => setIsContinueWatchingOpen(false)}
+        progressList={watchProgressList}
+        onProgressUpdated={(updated) => setWatchProgressList(updated)}
+        onPlayItem={handlePlayMovie}
+      />
+
+      {/* 7. AIOStreams Super-Addon Aggregator Modal */}
       <AIOStreamsModal
         isOpen={isAIOStreamsOpen}
         onClose={() => setIsAIOStreamsOpen(false)}
       />
 
-      {/* 5. TV Remote & Keyboard Shortcuts Modal */}
+      {/* 8. TV Remote & Keyboard Shortcuts Modal */}
       <ShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}

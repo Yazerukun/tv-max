@@ -23,7 +23,8 @@ import {
   FastForward,
   Rewind,
   Sliders,
-  CheckCircle2
+  CheckCircle2,
+  PictureInPicture2
 } from 'lucide-react';
 import { CinemaMovie, Episode, StreamServer } from '../../data/cinemaMovies';
 import { 
@@ -40,6 +41,7 @@ interface CinemaPlayerProps {
   onSelectEpisode?: (episode: Episode) => void;
   settings: PlayerSettings;
   onUpdateSettings: (settings: Partial<PlayerSettings>) => void;
+  onMinimizeToMiniPlayer?: () => void;
 }
 
 export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
@@ -49,6 +51,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
   onSelectEpisode,
   settings,
   onUpdateSettings,
+  onMinimizeToMiniPlayer,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -582,6 +585,16 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
                 </button>
               ))}
             </>
+          )}
+
+          {onMinimizeToMiniPlayer && (
+            <button
+              onClick={onMinimizeToMiniPlayer}
+              className="p-1.5 rounded-xl text-slate-300 hover:text-cyan-300 hover:bg-white/10 transition ml-0.5"
+              title="Minimize to Floating Mini-Player (Keep Watching while browsing)"
+            >
+              <PictureInPicture2 className="w-4 h-4" />
+            </button>
           )}
 
           <button

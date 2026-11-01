@@ -6,6 +6,7 @@ export interface LiveChannel {
   category: 'pinoy' | 'news' | 'movies' | 'sports' | 'anime' | 'tech' | 'music';
   logo: string;
   streamUrl: string;
+  streamType?: 'hls' | 'youtube' | 'embed';
   quality: string;
   country: string;
   currentShow: string;
@@ -25,6 +26,18 @@ export const LIVE_TV_CATEGORIES = [
 
 export const LIVE_TV_CHANNELS: LiveChannel[] = [
   // 1. Pinoy & Asia
+  {
+    id: 'ch-gma-kapuso',
+    name: 'GMA Network (Kapuso Stream)',
+    category: 'pinoy',
+    logo: 'https://yt3.googleusercontent.com/_ZJZCMxEI1PZW3WHr4-lvvq2cua4oKcLAtXET1ecklKeTMRoqBDHTp3hHshe3rozByRxwOb5SA=s900-c-k-c0x00ffffff-no-rj',
+    streamUrl: 'https://www.youtube-nocookie.com/embed/live_stream?channel=UCKL5hAuzgFQsyrsQKgU0Qng&autoplay=1',
+    streamType: 'youtube',
+    quality: '1080p HD',
+    country: 'PH',
+    currentShow: 'Kapuso 24/7 Live Stream & News',
+    description: 'Official 24/7 GMA Network flagship live stream: breaking news, Kapuso teleseryes, public affairs, and entertainment programs.'
+  },
   {
     id: 'ch-tfc-guam',
     name: 'TFC Global (ABS-CBN)',

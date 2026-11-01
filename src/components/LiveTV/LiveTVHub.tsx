@@ -61,8 +61,29 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
     });
   }, [selectedCategory, searchQuery]);
 
-  // Load stream via HLS.js
+  // Check if current stream is YouTube Live
+  const isYouTubeStream = useMemo(() => {
+    return (
+      activeChannel.streamType === 'youtube' ||
+      activeChannel.streamUrl.includes('youtube.com') ||
+      activeChannel.streamUrl.includes('youtu.be')
+    );
+  }, [activeChannel]);
+
+  // Load stream via HLS.js or YouTube embed
   const loadChannelStream = useCallback((streamUrl: string) => {
+    if (streamUrl.includes('youtube.com') || streamUrl.includes('youtu.be')) {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      setIsLoading(false);
+      setHasError(false);
+      setErrorMessage('');
+      setIsPlaying(true);
+      return;
+    }
+
     if (!videoRef.current) return;
     const video = videoRef.current;
 
@@ -244,15 +265,8 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
             ref={containerRef}
             className="relative w-full aspect-video bg-black rounded-3xl overflow-hidden border border-white/10 shadow-2xl group flex items-center justify-center"
           >
-            <video
-              ref={videoRef}
-              className="w-full h-full object-contain"
-              playsInline
-              onClick={togglePlay}
-            />
-
             {/* Live Signal Indicator Pill */}
-            <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+            <div className="absolute top-4 left-4 z-30 flex items-center gap-2 pointer-events-none">
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase bg-rose-600 text-white shadow-lg shadow-rose-600/40">
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                 LIVE
@@ -267,7 +281,7 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
 
             {/* Toast Notification */}
             {autoPlayToast && (
-              <div className="absolute top-4 right-4 z-40 animate-fadeIn">
+              <div className="absolute top-4 right-4 z-40 animate-fadeIn pointer-events-none">
                 <div className="px-3.5 py-1.5 rounded-xl bg-black/85 backdrop-blur-xl border border-cyan-500/40 text-cyan-200 text-xs font-bold flex items-center gap-2 shadow-2xl">
                   <CheckCircle2 className="w-4 h-4 text-cyan-400" />
                   <span>{autoPlayToast}</span>
@@ -275,89 +289,109 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
               </div>
             )}
 
-            {/* Spinner Overlay */}
-            {isLoading && !hasError && (
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center z-20">
-                <div className="w-12 h-12 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin" />
-                <p className="mt-3 text-xs font-mono font-bold text-rose-300 tracking-wider">
-                  Connecting Live Broadcast...
-                </p>
-              </div>
-            )}
-
-            {/* Error Overlay */}
-            {hasError && (
-              <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 space-y-3">
-                <AlertCircle className="w-10 h-10 text-rose-400" />
-                <h3 className="text-base font-bold text-white">Live Broadcast Reconnecting</h3>
-                <p className="text-xs text-slate-400 max-w-sm">{errorMessage}</p>
-                <button
-                  onClick={() => loadChannelStream(activeChannel.streamUrl)}
-                  className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs flex items-center gap-1.5 transition shadow"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Retry Broadcast</span>
-                </button>
-              </div>
-            )}
-
-            {/* Bottom HUD Player Controls */}
-            <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <button
+            {isYouTubeStream ? (
+              <iframe
+                key={activeChannel.id}
+                src={activeChannel.streamUrl}
+                title={activeChannel.name}
+                className="w-full h-full border-0 rounded-3xl"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <>
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-contain"
+                  playsInline
                   onClick={togglePlay}
-                  className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center hover:scale-105 transition"
-                  title={isPlaying ? 'Pause' : 'Play'}
-                >
-                  {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
-                </button>
+                />
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsMuted((prev) => !prev)}
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
-                  >
-                    {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={isMuted ? 0 : volume}
-                    onChange={(e) => {
-                      setVolume(parseFloat(e.target.value));
-                      setIsMuted(false);
-                    }}
-                    className="w-20 accent-rose-500 h-1 rounded-lg cursor-pointer hidden sm:block"
-                  />
+                {/* Spinner Overlay */}
+                {isLoading && !hasError && (
+                  <div className="absolute inset-0 bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center z-20">
+                    <div className="w-12 h-12 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin" />
+                    <p className="mt-3 text-xs font-mono font-bold text-rose-300 tracking-wider">
+                      Connecting Live Broadcast...
+                    </p>
+                  </div>
+                )}
+
+                {/* Error Overlay */}
+                {hasError && (
+                  <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 space-y-3">
+                    <AlertCircle className="w-10 h-10 text-rose-400" />
+                    <h3 className="text-base font-bold text-white">Live Broadcast Reconnecting</h3>
+                    <p className="text-xs text-slate-400 max-w-sm">{errorMessage}</p>
+                    <button
+                      onClick={() => loadChannelStream(activeChannel.streamUrl)}
+                      className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs flex items-center gap-1.5 transition shadow"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Retry Broadcast</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Bottom HUD Player Controls */}
+                <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={togglePlay}
+                      className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center hover:scale-105 transition"
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setIsMuted((prev) => !prev)}
+                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                      >
+                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={isMuted ? 0 : volume}
+                        onChange={(e) => {
+                          setVolume(parseFloat(e.target.value));
+                          setIsMuted(false);
+                        }}
+                        className="w-20 accent-rose-500 h-1 rounded-lg cursor-pointer hidden sm:block"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title ticker in player */}
+                  <div className="min-w-0 text-center hidden md:block">
+                    <p className="text-xs font-bold text-white truncate max-w-xs">{activeChannel.name}</p>
+                    <p className="text-[10px] text-slate-400 truncate max-w-xs">{activeChannel.currentShow}</p>
+                  </div>
+
+                  {/* Right Controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={togglePiP}
+                      className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                      title="Picture in Picture"
+                    >
+                      <PictureInPicture className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                      title="Fullscreen"
+                    >
+                      {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Title ticker in player */}
-              <div className="min-w-0 text-center hidden md:block">
-                <p className="text-xs font-bold text-white truncate max-w-xs">{activeChannel.name}</p>
-                <p className="text-[10px] text-slate-400 truncate max-w-xs">{activeChannel.currentShow}</p>
-              </div>
-
-              {/* Right Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={togglePiP}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
-                  title="Picture in Picture"
-                >
-                  <PictureInPicture className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
-                  title="Fullscreen"
-                >
-                  {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Current Broadcast Metadata Banner */}

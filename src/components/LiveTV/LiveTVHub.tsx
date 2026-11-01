@@ -30,24 +30,47 @@ interface LiveTVHubProps {
   onBackToCinema?: () => void;
 }
 
-// Helper to convert any YouTube URL into an embeddable stream URL
+// Helper to send postMessage commands to cloaked YouTube iframe
+function sendYouTubeCommand(iframe: HTMLIFrameElement | null, func: string, args: any[] = []) {
+  if (!iframe || !iframe.contentWindow) return;
+  try {
+    iframe.contentWindow.postMessage(
+      JSON.stringify({
+        event: 'command',
+        func,
+        args
+      }),
+      '*'
+    );
+  } catch (err) {
+    console.warn('[LiveTV] sendYouTubeCommand error:', err);
+  }
+}
+
+// Helper to convert any YouTube URL into a stealth embeddable stream URL (cloaked, zero YouTube branding)
 function formatLiveStreamUrl(url: string): string {
-  if (url.includes('youtube.com/watch?v=')) {
+  const stealthParams = 'autoplay=1&mute=0&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1';
+  
+  if (url.includes('youtube.com/watch?v=') || url.includes('youtube-nocookie.com/watch?v=')) {
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (videoId) {
-      return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+      return `https://www.youtube-nocookie.com/embed/${videoId}?${stealthParams}`;
     }
   }
   if (url.includes('youtu.be/')) {
     const videoId = url.split('youtu.be/')[1]?.split('?')[0];
     if (videoId) {
-      return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+      return `https://www.youtube-nocookie.com/embed/${videoId}?${stealthParams}`;
     }
+  }
+  if (url.includes('/embed/')) {
+    const base = url.split('?')[0];
+    return `${base}?${stealthParams}`;
   }
   if (url.includes('youtube.com/channel/') && url.includes('/live')) {
     const channelId = url.split('channel/')[1]?.split('/')[0];
     if (channelId) {
-      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1`;
+      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&${stealthParams}`;
     }
   }
   return url;
@@ -61,9 +84,10 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
   // Player state
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -208,7 +232,15 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
       videoRef.current.volume = isMuted ? 0 : volume;
       videoRef.current.muted = isMuted;
     }
-  }, [volume, isMuted]);
+    if (iframeRef.current && isYouTubeStream) {
+      if (isMuted) {
+        sendYouTubeCommand(iframeRef.current, 'mute');
+      } else {
+        sendYouTubeCommand(iframeRef.current, 'unMute');
+        sendYouTubeCommand(iframeRef.current, 'setVolume', [Math.round(volume * 100)]);
+      }
+    }
+  }, [volume, isMuted, isYouTubeStream]);
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
@@ -236,6 +268,16 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
 
   // Toggle Play / Pause
   const togglePlay = useCallback(() => {
+    if (isYouTubeStream) {
+      if (isPlaying) {
+        sendYouTubeCommand(iframeRef.current, 'pauseVideo');
+        setIsPlaying(false);
+      } else {
+        sendYouTubeCommand(iframeRef.current, 'playVideo');
+        setIsPlaying(true);
+      }
+      return;
+    }
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
@@ -243,7 +285,16 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
     } else {
       videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
-  }, [isPlaying]);
+  }, [isPlaying, isYouTubeStream]);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => !prev);
+  }, []);
+
+  const handleVolumeChange = useCallback((newVol: number) => {
+    setVolume(newVol);
+    setIsMuted(false);
+  }, []);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[#03050a] text-white flex flex-col pb-20 md:pb-8">
@@ -319,14 +370,72 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
             )}
 
             {isYouTubeStream ? (
-              <iframe
-                key={activeChannel.id}
-                src={formatLiveStreamUrl(activeChannel.streamUrl)}
-                title={activeChannel.name}
-                className="w-full h-full border-0 rounded-3xl"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+              <div className="relative w-full h-full overflow-hidden bg-black flex items-center justify-center select-none">
+                {/* Scaled & Cropped YouTube Iframe (Completely hides YouTube top banner, title, watermark & button) */}
+                <iframe
+                  ref={iframeRef}
+                  key={activeChannel.id}
+                  src={formatLiveStreamUrl(activeChannel.streamUrl)}
+                  title={activeChannel.name}
+                  className="absolute -top-[14%] -left-[7%] w-[114%] h-[128%] border-0 pointer-events-none scale-[1.05] select-none"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+
+                {/* Transparent Shield: Traps all clicks so user cannot click or open YouTube, and toggles play/pause */}
+                <div 
+                  onClick={togglePlay}
+                  className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+                />
+
+                {/* Custom TV MAX HUD Player Controls on top */}
+                <div className="absolute bottom-0 inset-x-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between gap-4 pointer-events-auto">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={togglePlay}
+                      className="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center hover:scale-105 transition"
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={toggleMute}
+                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                        title={isMuted ? 'Unmute' : 'Mute'}
+                      >
+                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={isMuted ? 0 : volume}
+                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                        className="w-20 accent-rose-500 h-1 rounded-lg cursor-pointer hidden sm:block"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title ticker in player */}
+                  <div className="min-w-0 text-center hidden md:block">
+                    <p className="text-xs font-bold text-white truncate max-w-xs">{activeChannel.name}</p>
+                    <p className="text-[10px] text-slate-400 truncate max-w-xs">{activeChannel.currentShow}</p>
+                  </div>
+
+                  {/* Right Controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+                      title="Fullscreen"
+                    >
+                      {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <>
                 <video
@@ -375,7 +484,7 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setIsMuted((prev) => !prev)}
+                        onClick={toggleMute}
                         className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
                       >
                         {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
@@ -386,10 +495,7 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
                         max="1"
                         step="0.05"
                         value={isMuted ? 0 : volume}
-                        onChange={(e) => {
-                          setVolume(parseFloat(e.target.value));
-                          setIsMuted(false);
-                        }}
+                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
                         className="w-20 accent-rose-500 h-1 rounded-lg cursor-pointer hidden sm:block"
                       />
                     </div>

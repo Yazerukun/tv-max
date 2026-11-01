@@ -499,6 +499,22 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Scrollable Category Selector Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {onNavigateToTv && (
+              <button
+                type="button"
+                onClick={onNavigateToTv}
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-lg shadow-rose-600/30 hover:scale-105 active:scale-95 border border-rose-400/40"
+                title="Switch to 24/7 Free Live TV Channels Hub"
+              >
+                <Tv className="w-3.5 h-3.5 text-rose-200" />
+                <span>Live TV</span>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-200 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+              </button>
+            )}
+
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.id;

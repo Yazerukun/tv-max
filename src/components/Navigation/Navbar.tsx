@@ -24,6 +24,8 @@ interface NavbarProps {
   watchlistCount: number;
   viewMode: 'rails' | 'grid';
   onToggleViewMode: () => void;
+  navMode: 'cinema' | 'livetv';
+  onSelectNavMode: (mode: 'cinema' | 'livetv') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -36,6 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   watchlistCount,
   viewMode,
   onToggleViewMode,
+  navMode,
+  onSelectNavMode,
 }) => {
   return (
     <header className="h-16 border-b border-white/10 bg-[#04060c]/95 backdrop-blur-2xl px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-6 z-40 select-none sticky top-0">
@@ -76,6 +80,41 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Mode Switcher: Cinema VOD vs Dedicated Free Live TV Hub */}
+        <div className="hidden sm:flex items-center p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-2">
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('cinema')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              navMode === 'cinema'
+                ? 'bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-md shadow-cyan-500/25 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Browse Movies & Series Catalog"
+          >
+            <Film className="w-3.5 h-3.5" />
+            <span>Cinema VOD</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('livetv')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              navMode === 'livetv'
+                ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md shadow-rose-500/30 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Watch 24/7 Free Live TV Channels"
+          >
+            <Tv className="w-3.5 h-3.5" />
+            <span>Live TV</span>
+            <span className="flex h-2 w-2 relative ml-0.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+            </span>
+          </button>
         </div>
       </div>
 

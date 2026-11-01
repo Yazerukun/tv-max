@@ -19,11 +19,19 @@ import {
   Radio,
   Loader2,
   Skull,
-  Compass
+  Compass,
+  X,
+  RotateCcw
 } from 'lucide-react';
 import { CINEMA_MOVIES, CinemaMovie, Episode } from '../../data/cinemaMovies';
 import { MovieDetailModal } from './MovieDetailModal';
-import { getStoredWatchlist, toggleStoredWatchlist } from '../../utils/storage';
+import { 
+  getStoredWatchlist, 
+  toggleStoredWatchlist, 
+  getStoredWatchProgress, 
+  removeWatchProgress, 
+  WatchProgress 
+} from '../../utils/storage';
 import { 
   fetchMultiCategoryCatalogs, 
   MultiCategoryCatalogs, 
@@ -47,6 +55,20 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   const [activeModalMovie, setActiveModalMovie] = useState<CinemaMovie | null>(null);
   const [viewMode, setViewMode] = useState<'rails' | 'grid'>('rails');
   const [watchlistIds, setWatchlistIds] = useState<string[]>(() => getStoredWatchlist());
+  const [watchProgressList, setWatchProgressList] = useState<WatchProgress[]>(() => getStoredWatchProgress());
+
+  // Keep watch progress synced on focus
+  useEffect(() => {
+    const refresh = () => setWatchProgressList(getStoredWatchProgress());
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  const handleRemoveProgress = (e: React.MouseEvent, movieId: string) => {
+    e.stopPropagation();
+    const updated = removeWatchProgress(movieId);
+    setWatchProgressList(updated);
+  };
 
   // Realtime Live Data State from Nuvio Cinemeta API (Multi-Category Engine)
   const [multiCatalogs, setMultiCatalogs] = useState<MultiCategoryCatalogs | null>(null);
@@ -527,6 +549,138 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
       {/* 4. CONTENT DISPLAY: RAILS MODE VS GRID MODE */}
       {viewMode === 'rails' && !searchQuery.trim() && selectedCategory === 'all' ? (
         <div className="space-y-8 px-4 sm:px-8 pt-4">
+          {/* CONTINUE WATCHING RAIL */}
+          {watchProgressList.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <RotateCcw className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Continue Watching
+                  </h2>
+                  <span className="text-[11px] font-mono text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30">
+                    {watchProgressList.length} in progress
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-continue', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-continue', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Continue Row */}
+              <div
+                id="rail-continue"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
+              >
+                {watchProgressList.map((item) => {
+                  const foundMovie = CINEMA_MOVIES.find((m) => m.id === item.movieId) || {
+                    id: item.movieId,
+                    title: item.movieTitle,
+                    type: item.type,
+                    year: 2024,
+                    rating: 'PG-13',
+                    imdbScore: 8.0,
+                    quality: '1080p FHD',
+                    duration: '2h 00m',
+                    genres: ['Drama', 'Action'],
+                    director: 'Director',
+                    cast: [],
+                    description: item.movieTitle,
+                    posterUrl: item.poster,
+                    backdropUrl: item.backdrop || item.poster,
+                    category: item.type === 'series' ? 'series' : 'trending',
+                    streamUrl: `https://vidsrc.to/embed/${item.type === 'series' ? 'tv' : 'movie'}/${item.movieId}`,
+                    servers: [],
+                  };
+
+                  const epMatch = item.seasonNumber && item.episodeNumber
+                    ? {
+                        id: `${item.movieId}:${item.seasonNumber}:${item.episodeNumber}`,
+                        seasonNumber: item.seasonNumber,
+                        episodeNumber: item.episodeNumber,
+                        title: item.episodeTitle || `Episode ${item.episodeNumber}`,
+                        duration: '45m',
+                        overview: '',
+                        thumbnail: item.backdrop || item.poster,
+                        servers: [],
+                      }
+                    : undefined;
+
+                  return (
+                    <div
+                      key={item.movieId}
+                      onClick={() => onPlayMovie(foundMovie as CinemaMovie, epMatch)}
+                      className="relative flex-shrink-0 w-44 sm:w-52 group cursor-pointer snap-start"
+                    >
+                      <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 group-hover:border-cyan-500/60 shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300">
+                        <img
+                          src={item.backdrop || item.poster}
+                          alt={item.movieTitle}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+
+                        {/* Top Dimmer & Delete Button */}
+                        <div className="absolute top-2 right-2 z-20">
+                          <button
+                            onClick={(e) => handleRemoveProgress(e, item.movieId)}
+                            className="p-1 rounded-lg bg-black/60 hover:bg-rose-500 text-slate-400 hover:text-white transition"
+                            title="Remove from Continue Watching"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Play Icon Overlay */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-10">
+                          <div className="w-10 h-10 rounded-full bg-cyan-500 text-black flex items-center justify-center shadow-lg transform group-hover:scale-110 transition">
+                            <Play className="w-5 h-5 fill-black ml-0.5" />
+                          </div>
+                        </div>
+
+                        {/* Progress Bar Line */}
+                        <div className="absolute bottom-0 inset-x-0 h-1.5 bg-white/20">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-400 to-sky-500 shadow-sm shadow-cyan-400"
+                            style={{ width: `${Math.max(5, item.percentage)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Title & Progress Label */}
+                      <div className="mt-2 flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-xs font-bold text-white truncate group-hover:text-cyan-300 transition">
+                            {item.movieTitle}
+                          </h3>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {item.seasonNumber ? `S${item.seasonNumber} E${item.episodeNumber}` : 'Movie'} • {item.percentage}% watched
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* RAIL 1: TOP 10 TRENDING TODAY (With Giant Stylized Numbers) */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navigation/Navbar';
 import { MobileBottomDock } from './components/Navigation/MobileBottomDock';
 import { CinemaVODHub } from './components/Cinema/CinemaVODHub';
+import { LiveTVHub } from './components/LiveTV/LiveTVHub';
 import { CinemaPlayer } from './components/Player/CinemaPlayer';
 import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
@@ -12,10 +13,15 @@ import {
   PlayerSettings, 
   getStoredWatchlist,
   getStoredViewMode,
-  saveStoredViewMode
+  saveStoredViewMode,
+  getStoredNavMode,
+  saveStoredNavMode
 } from './utils/storage';
 
 export const App: React.FC = () => {
+  // Navigation Mode (Cinema VOD vs Dedicated Free Live TV Hub)
+  const [navMode, setNavMode] = useState<'cinema' | 'livetv'>(() => getStoredNavMode());
+
   // Currently streaming movie / episode state
   const [activeMovie, setActiveMovie] = useState<CinemaMovie | null>(null);
   const [activeEpisode, setActiveEpisode] = useState<Episode | undefined>(undefined);
@@ -34,6 +40,16 @@ export const App: React.FC = () => {
 
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)
   const [playerSettings, setPlayerSettings] = useState<PlayerSettings>(() => getStoredPlayerSettings());
+
+  const handleSelectNavMode = useCallback((mode: 'cinema' | 'livetv') => {
+    setNavMode(mode);
+    saveStoredNavMode(mode);
+    if (activeMovie) {
+      setActiveMovie(null);
+      setActiveEpisode(undefined);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeMovie]);
 
   const handleUpdateSettings = useCallback((updated: Partial<PlayerSettings>) => {
     setPlayerSettings((prev) => {
@@ -131,10 +147,12 @@ export const App: React.FC = () => {
           watchlistCount={watchlistCount}
           viewMode={viewMode}
           onToggleViewMode={handleToggleViewMode}
+          navMode={navMode}
+          onSelectNavMode={handleSelectNavMode}
         />
       )}
 
-      {/* 2. Main Viewport: Cinema Player vs Nuvio Media Catalog */}
+      {/* 2. Main Viewport: Cinema Player vs Nuvio Media Catalog vs Dedicated Live TV Hub */}
       <main className="flex-1 w-full relative">
         {activeMovie ? (
           <CinemaPlayer
@@ -145,10 +163,12 @@ export const App: React.FC = () => {
             settings={playerSettings}
             onUpdateSettings={handleUpdateSettings}
           />
+        ) : navMode === 'livetv' ? (
+          <LiveTVHub onBackToCinema={() => handleSelectNavMode('cinema')} />
         ) : (
           <CinemaVODHub
             onPlayMovie={handlePlayMovie}
-            onNavigateToTv={() => {}}
+            onNavigateToTv={() => handleSelectNavMode('livetv')}
             onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           />
         )}
@@ -164,6 +184,8 @@ export const App: React.FC = () => {
           }}
           onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           watchlistCount={watchlistCount}
+          navMode={navMode}
+          onSelectNavMode={handleSelectNavMode}
         />
       )}
 

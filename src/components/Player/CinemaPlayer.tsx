@@ -26,7 +26,12 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { CinemaMovie, Episode, StreamServer } from '../../data/cinemaMovies';
-import { PlayerSettings } from '../../utils/storage';
+import { 
+  PlayerSettings, 
+  saveWatchProgress, 
+  getMovieWatchProgress, 
+  WatchProgress 
+} from '../../utils/storage';
 
 interface CinemaPlayerProps {
   movie: CinemaMovie;
@@ -64,6 +69,8 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
   const [showAspectMenu, setShowAspectMenu] = useState<boolean>(false);
   const [showEpisodeDrawer, setShowEpisodeDrawer] = useState<boolean>(false);
   const [failoverToast, setFailoverToast] = useState<string | null>(null);
+  const [resumePrompt, setResumePrompt] = useState<{ time: number; label: string } | null>(null);
+  const lastSavedTimeRef = useRef<number>(0);
 
   const controlsTimeoutRef = useRef<number | null>(null);
 
@@ -86,12 +93,36 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
         ];
   }, [movie, activeEpisode]);
 
-  // Reset server index when movie or episode changes
+  // Reset server index and check stored watch progress
   useEffect(() => {
     setCurrentServerIndex(0);
     setHasError(false);
     setErrorMessage('');
+
+    const prevProgress = getMovieWatchProgress(movie.id);
+    if (prevProgress && prevProgress.currentTime > 20 && prevProgress.percentage < 92) {
+      const mins = Math.floor(prevProgress.currentTime / 60);
+      const secs = Math.floor(prevProgress.currentTime % 60);
+      setResumePrompt({
+        time: prevProgress.currentTime,
+        label: `${mins}:${secs < 10 ? '0' : ''}${secs}`,
+      });
+      const t = setTimeout(() => setResumePrompt(null), 12000);
+      return () => clearTimeout(t);
+    } else {
+      setResumePrompt(null);
+    }
   }, [movie.id, activeEpisode?.id]);
+
+  const handleResumePlayback = useCallback(() => {
+    if (resumePrompt && videoRef.current) {
+      videoRef.current.currentTime = resumePrompt.time;
+      setCurrentTime(resumePrompt.time);
+      setFailoverToast(`Resumed playback from ${resumePrompt.label}`);
+      setTimeout(() => setFailoverToast(null), 3000);
+      setResumePrompt(null);
+    }
+  }, [resumePrompt]);
 
   const activeServer = availableServers[currentServerIndex] || availableServers[0];
   const activeStreamUrl = activeServer.url;
@@ -212,12 +243,53 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
     };
   }, [activeStreamUrl, loadStream]);
 
-  // Video playback time updates
+  // Video playback time updates and watch progress saving
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
-    setCurrentTime(videoRef.current.currentTime);
-    setDuration(videoRef.current.duration || 0);
+    const cur = videoRef.current.currentTime;
+    const dur = videoRef.current.duration || 0;
+    setCurrentTime(cur);
+    setDuration(dur);
+
+    if (Math.abs(cur - lastSavedTimeRef.current) >= 5 && dur > 20) {
+      lastSavedTimeRef.current = cur;
+      const pct = Math.min(100, Math.round((cur / dur) * 100));
+      saveWatchProgress({
+        movieId: movie.id,
+        movieTitle: movie.title,
+        poster: movie.posterUrl,
+        backdrop: movie.backdropUrl,
+        type: movie.type || (movie.seasons && movie.seasons.length > 0 ? 'series' : 'movie'),
+        seasonNumber: activeEpisode?.seasonNumber,
+        episodeNumber: activeEpisode?.episodeNumber,
+        episodeTitle: activeEpisode?.title,
+        currentTime: Math.floor(cur),
+        duration: Math.floor(dur),
+        percentage: pct,
+        lastWatched: Date.now(),
+      });
+    }
   };
+
+  // Register watch start for embeds
+  useEffect(() => {
+    if (isEmbedStream) {
+      saveWatchProgress({
+        movieId: movie.id,
+        movieTitle: movie.title,
+        poster: movie.posterUrl,
+        backdrop: movie.backdropUrl,
+        type: movie.type || (movie.seasons && movie.seasons.length > 0 ? 'series' : 'movie'),
+        seasonNumber: activeEpisode?.seasonNumber,
+        episodeNumber: activeEpisode?.episodeNumber,
+        episodeTitle: activeEpisode?.title,
+        currentTime: 0,
+        duration: 7200,
+        percentage: 15,
+        lastWatched: Date.now(),
+      });
+    }
+  }, [movie.id, activeEpisode?.id, isEmbedStream]);
 
   // Play / Pause Toggle
   const togglePlay = () => {
@@ -357,6 +429,28 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
         </div>
       )}
 
+      {/* 2B. Resume Playback Prompt Notification */}
+      {resumePrompt && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-fadeIn">
+          <div className="px-4 py-2 rounded-2xl bg-gradient-to-r from-cyan-950 via-[#070914] to-indigo-950 border border-cyan-500/50 text-white text-xs font-bold flex items-center gap-3 shadow-2xl backdrop-blur-xl">
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span>Resume from {resumePrompt.label}?</span>
+            <button
+              onClick={handleResumePlayback}
+              className="px-3 py-1 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs transition shadow"
+            >
+              Resume
+            </button>
+            <button
+              onClick={() => setResumePrompt(null)}
+              className="text-slate-400 hover:text-white text-xs"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 3. Media Player Container */}
       <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         {isEmbedStream ? (
@@ -365,6 +459,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
             src={normalizeEmbedUrl(activeStreamUrl)}
             className="w-full h-full border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
             allowFullScreen
             title={movie.title}
           />

@@ -116,6 +116,45 @@ export function buildRealMovieStreams(
       speed: '75 MB/s',
       latency: '14ms',
       isVerified: true
+    },
+    {
+      id: `aio-vidlink-${id}-${season}-${episode}`,
+      name: '[AIO VidLink 6] Multi-Subtitles Pro Player',
+      url: isSeries
+        ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
+        : `https://vidlink.pro/movie/${id}`,
+      type: 'embed',
+      quality: '1080p FHD',
+      provider: 'VidLink Pro',
+      speed: '80 MB/s',
+      latency: '16ms',
+      isVerified: true
+    },
+    {
+      id: `aio-smashy-${id}-${season}-${episode}`,
+      name: '[AIO Smashy 7] Ultra Fallback Stream',
+      url: isSeries
+        ? `https://player.smashystream.com/tv/${id}?s=${season}&e=${episode}`
+        : `https://player.smashystream.com/movie/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'SmashyStream',
+      speed: '60 MB/s',
+      latency: '20ms',
+      isVerified: true
+    },
+    {
+      id: `aio-superembed-${id}-${season}-${episode}`,
+      name: '[AIO SuperEmbed 8] Direct Global CDN',
+      url: isSeries
+        ? `https://multiembed.mov/directstream.php?video_id=${id}&s=${season}&e=${episode}`
+        : `https://multiembed.mov/directstream.php?video_id=${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'SuperEmbed Global',
+      speed: '70 MB/s',
+      latency: '15ms',
+      isVerified: true
     }
   ];
 }

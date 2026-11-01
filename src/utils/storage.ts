@@ -5,7 +5,24 @@ const STORAGE_KEYS = {
   SETTINGS: 'tvmax_player_settings',
   VIEW_MODE: 'tvmax_view_mode',
   LAST_PLAYED: 'tvmax_last_played',
+  WATCH_PROGRESS: 'tvmax_watch_progress',
+  NAV_MODE: 'tvmax_nav_mode',
 };
+
+export interface WatchProgress {
+  movieId: string;
+  movieTitle: string;
+  poster: string;
+  backdrop?: string;
+  type: 'movie' | 'series';
+  seasonNumber?: number;
+  episodeNumber?: number;
+  episodeTitle?: string;
+  currentTime: number;
+  duration: number;
+  percentage: number;
+  lastWatched: number;
+}
 
 export interface PlayerSettings {
   ambientGlow: boolean;
@@ -69,4 +86,57 @@ export function getStoredViewMode(): 'rails' | 'grid' {
 
 export function saveStoredViewMode(mode: 'rails' | 'grid'): void {
   localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode);
+}
+
+// Watch Progress Persistence (Continue Watching)
+export function getStoredWatchProgress(): WatchProgress[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.WATCH_PROGRESS);
+    if (!raw) return [];
+    const list: WatchProgress[] = JSON.parse(raw);
+    return Array.isArray(list) ? list.sort((a, b) => b.lastWatched - a.lastWatched) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveWatchProgress(item: WatchProgress): void {
+  try {
+    const current = getStoredWatchProgress();
+    // Filter out previous entry for the same movie/series
+    const filtered = current.filter((x) => x.movieId !== item.movieId);
+    const updated = [item, ...filtered].slice(0, 30); // keep up to 30 recent items
+    localStorage.setItem(STORAGE_KEYS.WATCH_PROGRESS, JSON.stringify(updated));
+  } catch (err) {
+    console.warn('[Storage] Failed to save watch progress:', err);
+  }
+}
+
+export function removeWatchProgress(movieId: string): WatchProgress[] {
+  try {
+    const current = getStoredWatchProgress();
+    const updated = current.filter((x) => x.movieId !== movieId);
+    localStorage.setItem(STORAGE_KEYS.WATCH_PROGRESS, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+}
+
+export function getMovieWatchProgress(movieId: string): WatchProgress | undefined {
+  const current = getStoredWatchProgress();
+  return current.find((x) => x.movieId === movieId);
+}
+
+export function getStoredNavMode(): 'cinema' | 'livetv' {
+  try {
+    const val = localStorage.getItem(STORAGE_KEYS.NAV_MODE);
+    return val === 'livetv' ? 'livetv' : 'cinema';
+  } catch {
+    return 'cinema';
+  }
+}
+
+export function saveStoredNavMode(mode: 'cinema' | 'livetv'): void {
+  localStorage.setItem(STORAGE_KEYS.NAV_MODE, mode);
 }

@@ -243,6 +243,18 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
     };
   }, [activeStreamUrl, loadStream]);
 
+  // Guard against aggressive ad networks redirecting the parent page during playback
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   // Video playback time updates and watch progress saving
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
@@ -459,7 +471,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
             src={normalizeEmbedUrl(activeStreamUrl)}
             className="w-full h-full border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+            referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
             title={movie.title}
           />

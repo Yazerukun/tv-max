@@ -11,7 +11,9 @@ import {
   SlidersHorizontal,
   LayoutGrid,
   Rows,
-  Zap
+  Zap,
+  BookOpen,
+  Compass
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -24,8 +26,8 @@ interface NavbarProps {
   watchlistCount: number;
   viewMode: 'rails' | 'grid';
   onToggleViewMode: () => void;
-  navMode: 'cinema' | 'livetv' | 'anime';
-  onSelectNavMode: (mode: 'cinema' | 'livetv' | 'anime') => void;
+  navMode: 'cinema' | 'series' | 'livetv' | 'anime' | 'manga';
+  onSelectNavMode: (mode: 'cinema' | 'series' | 'livetv' | 'anime' | 'manga') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -82,28 +84,43 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Mode Switcher: 3 Segregated Hubs (Movies vs Live TV vs Anime) */}
-        <div className="flex items-center p-0.5 sm:p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-1 sm:ml-2">
+        {/* Mode Switcher: 5 Entertainment Hubs (Movies, Series, Live TV, Anime, Manga/Manhwa Reader) */}
+        <div className="flex items-center p-0.5 sm:p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-1 sm:ml-2 overflow-x-auto scrollbar-none">
           {/* 1. Cinema / Movies */}
           <button
             type="button"
             onClick={() => onSelectNavMode('cinema')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               navMode === 'cinema'
                 ? 'bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-md shadow-cyan-500/25 scale-105'
                 : 'text-slate-400 hover:text-white'
             }`}
-            title="Browse Movies & Series Catalog"
+            title="Browse Movies Catalog"
           >
             <Film className="w-3.5 h-3.5" />
             <span>Movies</span>
           </button>
 
-          {/* 2. Free Live TV */}
+          {/* 2. TV Series & Shows */}
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('series')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
+              navMode === 'series'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/25 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Browse TV Series & Multi-Season Shows"
+          >
+            <Compass className="w-3.5 h-3.5 text-purple-300" />
+            <span>Series</span>
+          </button>
+
+          {/* 3. Free Live TV */}
           <button
             type="button"
             onClick={() => onSelectNavMode('livetv')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               navMode === 'livetv'
                 ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md shadow-rose-500/30 scale-105'
                 : 'text-slate-400 hover:text-white'
@@ -112,25 +129,40 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Tv className="w-3.5 h-3.5 text-rose-400" />
             <span>Live TV</span>
-            <span className="flex h-2 w-2 relative ml-0.5">
+            <span className="flex h-1.5 w-1.5 relative ml-0.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
             </span>
           </button>
 
-          {/* 3. Dedicated Anime Hub */}
+          {/* 4. Dedicated Anime Hub */}
           <button
             type="button"
             onClick={() => onSelectNavMode('anime')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               navMode === 'anime'
                 ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-md shadow-fuchsia-500/30 scale-105'
                 : 'text-slate-400 hover:text-white'
             }`}
-            title="Dedicated Anime Streaming Engine (Zero Ads)"
+            title="Dedicated Anime Hub (Yomi)"
           >
             <Sparkles className="w-3.5 h-3.5 text-fuchsia-300" />
             <span>Anime</span>
+          </button>
+
+          {/* 5. Dedicated Manhwa / Manga Reader */}
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('manga')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
+              navMode === 'manga'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Dedicated Manhwa & Manga Reader (MangaFire)"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-emerald-300" />
+            <span>Manga</span>
           </button>
         </div>
       </div>

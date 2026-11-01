@@ -21,7 +21,8 @@ import {
   Skull,
   Compass,
   X,
-  RotateCcw
+  RotateCcw,
+  BookOpen
 } from 'lucide-react';
 import { CINEMA_MOVIES, CinemaMovie, Episode } from '../../data/cinemaMovies';
 import { MovieDetailModal } from './MovieDetailModal';
@@ -43,16 +44,26 @@ interface CinemaVODHubProps {
   onPlayMovie: (movie: CinemaMovie, episode?: Episode) => void;
   onNavigateToTv: () => void;
   onNavigateToAnime?: () => void;
+  onNavigateToManga?: () => void;
   onOpenAIOStreams?: () => void;
+  initialCategory?: string;
 }
 
 export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   onPlayMovie,
   onNavigateToTv,
   onNavigateToAnime,
+  onNavigateToManga,
   onOpenAIOStreams,
+  initialCategory,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => initialCategory || 'all');
+
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeModalMovie, setActiveModalMovie] = useState<CinemaMovie | null>(null);
   const [viewMode, setViewMode] = useState<'rails' | 'grid'>('rails');
@@ -526,6 +537,18 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
               >
                 <Sparkles className="w-3.5 h-3.5 text-fuchsia-200" />
                 <span>Anime Hub</span>
+              </button>
+            )}
+
+            {onNavigateToManga && (
+              <button
+                type="button"
+                onClick={onNavigateToManga}
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 border border-emerald-400/40"
+                title="Switch to Dedicated Manhwa & Manga Reader (MangaFire)"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-emerald-200" />
+                <span>Manga Reader</span>
               </button>
             )}
 

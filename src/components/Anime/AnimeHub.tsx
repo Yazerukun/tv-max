@@ -14,12 +14,14 @@ import {
   ShieldCheck,
   CheckCircle2,
   Expand,
-  Shrink
+  Shrink,
+  BookOpen
 } from 'lucide-react';
 
 interface AnimeHubProps {
   onBackToCinema?: () => void;
   onNavigateToLiveTv?: () => void;
+  onNavigateToManga?: () => void;
 }
 
 const QUICK_SHORTCUTS = [
@@ -35,7 +37,11 @@ const QUICK_SHORTCUTS = [
   { label: 'Attack on Titan', url: 'https://yomi.to/search?q=Attack+on+Titan' },
 ];
 
-export const AnimeHub: React.FC<AnimeHubProps> = ({ onBackToCinema, onNavigateToLiveTv }) => {
+export const AnimeHub: React.FC<AnimeHubProps> = ({ 
+  onBackToCinema, 
+  onNavigateToLiveTv,
+  onNavigateToManga
+}) => {
   const [currentUrl, setCurrentUrl] = useState<string>('https://yomi.to/');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -132,6 +138,17 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({ onBackToCinema, onNavigateTo
             >
               <Tv className="w-3.5 h-3.5 text-rose-400" />
               <span className="hidden sm:inline">Live TV</span>
+            </button>
+          )}
+
+          {onNavigateToManga && (
+            <button
+              onClick={onNavigateToManga}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition"
+              title="Manga & Manhwa Reader"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Manga</span>
             </button>
           )}
 
@@ -270,6 +287,16 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({ onBackToCinema, onNavigateTo
                 title="Live TV"
               >
                 <Tv className="w-3.5 h-3.5 text-rose-400" />
+              </button>
+            )}
+
+            {onNavigateToManga && (
+              <button
+                onClick={onNavigateToManga}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                title="Manga & Manhwa"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
               </button>
             )}
 

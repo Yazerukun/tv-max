@@ -4,6 +4,7 @@ import { MobileBottomDock } from './components/Navigation/MobileBottomDock';
 import { CinemaVODHub } from './components/Cinema/CinemaVODHub';
 import { LiveTVHub } from './components/LiveTV/LiveTVHub';
 import { AnimeHub } from './components/Anime/AnimeHub';
+import { MangaHub } from './components/Manga/MangaHub';
 import { CinemaPlayer } from './components/Player/CinemaPlayer';
 import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
@@ -154,7 +155,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 2. Main Viewport: Cinema Player vs Movies Catalog vs Dedicated Live TV vs Dedicated Anime Hub */}
+      {/* 2. Main Viewport: Cinema Player vs Movies Catalog vs Series vs Dedicated Live TV vs Anime vs Manga */}
       <main className="flex-1 w-full relative">
         {activeMovie ? (
           <CinemaPlayer
@@ -171,12 +172,22 @@ export const App: React.FC = () => {
           <AnimeHub
             onBackToCinema={() => handleSelectNavMode('cinema')}
             onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+            onNavigateToManga={() => handleSelectNavMode('manga')}
+          />
+        ) : navMode === 'manga' ? (
+          <MangaHub
+            onBackToCinema={() => handleSelectNavMode('cinema')}
+            onNavigateToSeries={() => handleSelectNavMode('series')}
+            onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+            onNavigateToAnime={() => handleSelectNavMode('anime')}
           />
         ) : (
           <CinemaVODHub
+            initialCategory={navMode === 'series' ? 'series' : selectedCategory}
             onPlayMovie={handlePlayMovie}
             onNavigateToTv={() => handleSelectNavMode('livetv')}
             onNavigateToAnime={() => handleSelectNavMode('anime')}
+            onNavigateToManga={() => handleSelectNavMode('manga')}
             onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           />
         )}

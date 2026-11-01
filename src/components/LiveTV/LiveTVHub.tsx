@@ -30,6 +30,29 @@ interface LiveTVHubProps {
   onBackToCinema?: () => void;
 }
 
+// Helper to convert any YouTube URL into an embeddable stream URL
+function formatLiveStreamUrl(url: string): string {
+  if (url.includes('youtube.com/watch?v=')) {
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    if (videoId) {
+      return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+    }
+  }
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    if (videoId) {
+      return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+    }
+  }
+  if (url.includes('youtube.com/channel/') && url.includes('/live')) {
+    const channelId = url.split('channel/')[1]?.split('/')[0];
+    if (channelId) {
+      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channelId}&autoplay=1`;
+    }
+  }
+  return url;
+}
+
 export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -66,13 +89,19 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
     return (
       activeChannel.streamType === 'youtube' ||
       activeChannel.streamUrl.includes('youtube.com') ||
+      activeChannel.streamUrl.includes('youtube-nocookie.com') ||
       activeChannel.streamUrl.includes('youtu.be')
     );
   }, [activeChannel]);
 
   // Load stream via HLS.js or YouTube embed
   const loadChannelStream = useCallback((streamUrl: string) => {
-    if (streamUrl.includes('youtube.com') || streamUrl.includes('youtu.be')) {
+    const formattedUrl = formatLiveStreamUrl(streamUrl);
+    if (
+      formattedUrl.includes('youtube.com') || 
+      formattedUrl.includes('youtube-nocookie.com') || 
+      formattedUrl.includes('youtu.be')
+    ) {
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -292,7 +321,7 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
             {isYouTubeStream ? (
               <iframe
                 key={activeChannel.id}
-                src={activeChannel.streamUrl}
+                src={formatLiveStreamUrl(activeChannel.streamUrl)}
                 title={activeChannel.name}
                 className="w-full h-full border-0 rounded-3xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

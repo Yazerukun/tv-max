@@ -201,6 +201,18 @@ export const LIVE_TV_CHANNELS: LiveChannel[] = [
 
   // 5. Anime & Cartoons
   {
+    id: 'ch-cartoon-network',
+    name: 'Cartoon Network 24/7 Live',
+    category: 'anime',
+    logo: 'https://cdn.iconscout.com/icon/free/png-256/free-cartoon-network-3628704-3029929.png',
+    streamUrl: 'https://www.youtube.com/watch?v=fT1vVg8_B7E',
+    streamType: 'youtube',
+    quality: '1080p HD',
+    country: 'US',
+    currentShow: 'Trick-Or-Toon & Cartoon Network Classics Marathon',
+    description: 'Official Cartoon Network 24/7 live broadcast: non-stop iconic cartoons, animated marathons, Adventure Time, Regular Show, Ben 10, and classic favorites.'
+  },
+  {
     id: 'ch-japanim-tv',
     name: 'Japanim TV 24/7 (1080p)',
     category: 'anime',

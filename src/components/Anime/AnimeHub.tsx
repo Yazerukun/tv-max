@@ -15,13 +15,15 @@ import {
   CheckCircle2,
   Expand,
   Shrink,
-  BookOpen
+  BookOpen,
+  Clapperboard
 } from 'lucide-react';
 
 interface AnimeHubProps {
   onBackToCinema?: () => void;
   onNavigateToLiveTv?: () => void;
   onNavigateToManga?: () => void;
+  onNavigateToReelShort?: () => void;
 }
 
 const QUICK_SHORTCUTS = [
@@ -40,7 +42,8 @@ const QUICK_SHORTCUTS = [
 export const AnimeHub: React.FC<AnimeHubProps> = ({ 
   onBackToCinema, 
   onNavigateToLiveTv,
-  onNavigateToManga
+  onNavigateToManga,
+  onNavigateToReelShort
 }) => {
   const [currentUrl, setCurrentUrl] = useState<string>('https://yomi.to/');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -149,6 +152,17 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({
             >
               <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden sm:inline">Manga</span>
+            </button>
+          )}
+
+          {onNavigateToReelShort && (
+            <button
+              onClick={onNavigateToReelShort}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition"
+              title="ReelShort Dramas"
+            >
+              <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Reels</span>
             </button>
           )}
 
@@ -297,6 +311,16 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({
                 title="Manga & Manhwa"
               >
                 <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+              </button>
+            )}
+
+            {onNavigateToReelShort && (
+              <button
+                onClick={onNavigateToReelShort}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                title="ReelShort Dramas"
+              >
+                <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
               </button>
             )}
 

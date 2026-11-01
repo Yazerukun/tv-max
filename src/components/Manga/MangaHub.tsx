@@ -11,7 +11,8 @@ import {
   Expand, 
   Shrink, 
   CheckCircle2,
-  Compass
+  Compass,
+  Clapperboard
 } from 'lucide-react';
 
 interface MangaHubProps {
@@ -19,6 +20,7 @@ interface MangaHubProps {
   onNavigateToSeries?: () => void;
   onNavigateToLiveTv?: () => void;
   onNavigateToAnime?: () => void;
+  onNavigateToReelShort?: () => void;
 }
 
 const MANGA_SHORTCUTS = [
@@ -41,6 +43,7 @@ export const MangaHub: React.FC<MangaHubProps> = ({
   onNavigateToSeries,
   onNavigateToLiveTv,
   onNavigateToAnime,
+  onNavigateToReelShort,
 }) => {
   const [currentUrl, setCurrentUrl] = useState<string>('https://mangafire.to/');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -159,6 +162,17 @@ export const MangaHub: React.FC<MangaHubProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
               <span className="hidden sm:inline">Anime</span>
+            </button>
+          )}
+
+          {onNavigateToReelShort && (
+            <button
+              onClick={onNavigateToReelShort}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition"
+              title="ReelShort Dramas"
+            >
+              <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Reels</span>
             </button>
           )}
 
@@ -307,6 +321,16 @@ export const MangaHub: React.FC<MangaHubProps> = ({
                 title="Anime"
               >
                 <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
+              </button>
+            )}
+
+            {onNavigateToReelShort && (
+              <button
+                onClick={onNavigateToReelShort}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                title="ReelShort"
+              >
+                <Clapperboard className="w-3.5 h-3.5 text-amber-400" />
               </button>
             )}
 

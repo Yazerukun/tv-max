@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navigation/Navbar';
+import { Sidebar } from './components/Navigation/Sidebar';
 import { MobileBottomDock } from './components/Navigation/MobileBottomDock';
 import { CinemaVODHub } from './components/Cinema/CinemaVODHub';
 import { LiveTVHub } from './components/LiveTV/LiveTVHub';
 import { AnimeHub } from './components/Anime/AnimeHub';
 import { MangaHub } from './components/Manga/MangaHub';
+import { ReelShortHub } from './components/ReelShort/ReelShortHub';
 import { CinemaPlayer } from './components/Player/CinemaPlayer';
 import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
@@ -133,80 +135,110 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#04060c] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
-      {/* 1. TV MAX Universal Navbar (Hidden during active cinema playback for 100% viewport fit) */}
+    <div className="min-h-screen bg-[#04060c] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-cyan-500 selection:text-black">
+      {/* 1. Left Sidebar Navigation (Desktop / Tablet) featuring all 6 Entertainment Hubs */}
       {!activeMovie && (
-        <Navbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+        <Sidebar
+          navMode={navMode}
+          onSelectNavMode={handleSelectNavMode}
+          watchlistCount={watchlistCount}
           onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
           onSelectCategory={(cat) => {
             setSelectedCategory(cat);
-            if (activeMovie) setActiveMovie(null);
             refreshWatchlistCount();
           }}
           selectedCategory={selectedCategory}
-          watchlistCount={watchlistCount}
-          viewMode={viewMode}
-          onToggleViewMode={handleToggleViewMode}
-          navMode={navMode}
-          onSelectNavMode={handleSelectNavMode}
         />
       )}
 
-      {/* 2. Main Viewport: Cinema Player vs Movies Catalog vs Series vs Dedicated Live TV vs Anime vs Manga */}
-      <main className="flex-1 w-full relative">
-        {activeMovie ? (
-          <CinemaPlayer
-            movie={activeMovie}
-            activeEpisode={activeEpisode}
-            onBackToCatalog={handleBackToCatalog}
-            onSelectEpisode={(ep) => setActiveEpisode(ep)}
-            settings={playerSettings}
-            onUpdateSettings={handleUpdateSettings}
-          />
-        ) : navMode === 'livetv' ? (
-          <LiveTVHub onBackToCinema={() => handleSelectNavMode('cinema')} />
-        ) : navMode === 'anime' ? (
-          <AnimeHub
-            onBackToCinema={() => handleSelectNavMode('cinema')}
-            onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
-            onNavigateToManga={() => handleSelectNavMode('manga')}
-          />
-        ) : navMode === 'manga' ? (
-          <MangaHub
-            onBackToCinema={() => handleSelectNavMode('cinema')}
-            onNavigateToSeries={() => handleSelectNavMode('series')}
-            onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
-            onNavigateToAnime={() => handleSelectNavMode('anime')}
-          />
-        ) : (
-          <CinemaVODHub
-            initialCategory={navMode === 'series' ? 'series' : selectedCategory}
-            onPlayMovie={handlePlayMovie}
-            onNavigateToTv={() => handleSelectNavMode('livetv')}
-            onNavigateToAnime={() => handleSelectNavMode('anime')}
-            onNavigateToManga={() => handleSelectNavMode('manga')}
+      {/* 2. Main Content Column */}
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        {/* Top Navbar */}
+        {!activeMovie && (
+          <Navbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
+            onOpenShortcutsModal={() => setIsShortcutsOpen(true)}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              if (activeMovie) setActiveMovie(null);
+              refreshWatchlistCount();
+            }}
+            selectedCategory={selectedCategory}
+            watchlistCount={watchlistCount}
+            viewMode={viewMode}
+            onToggleViewMode={handleToggleViewMode}
+            navMode={navMode}
+            onSelectNavMode={handleSelectNavMode}
           />
         )}
-      </main>
 
-      {/* 3. Mobile Thumb Navigation Dock */}
-      {!activeMovie && (
-        <MobileBottomDock
-          selectedCategory={selectedCategory}
-          onSelectCategory={(cat) => {
-            setSelectedCategory(cat);
-            refreshWatchlistCount();
-          }}
-          onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
-          watchlistCount={watchlistCount}
-          navMode={navMode}
-          onSelectNavMode={handleSelectNavMode}
-        />
-      )}
+        {/* Main Viewport: Cinema Player vs 6 Core Hubs */}
+        <main className="flex-1 w-full relative">
+          {activeMovie ? (
+            <CinemaPlayer
+              movie={activeMovie}
+              activeEpisode={activeEpisode}
+              onBackToCatalog={handleBackToCatalog}
+              onSelectEpisode={(ep) => setActiveEpisode(ep)}
+              settings={playerSettings}
+              onUpdateSettings={handleUpdateSettings}
+            />
+          ) : navMode === 'livetv' ? (
+            <LiveTVHub onBackToCinema={() => handleSelectNavMode('cinema')} />
+          ) : navMode === 'anime' ? (
+            <AnimeHub
+              onBackToCinema={() => handleSelectNavMode('cinema')}
+              onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+              onNavigateToManga={() => handleSelectNavMode('manga')}
+              onNavigateToReelShort={() => handleSelectNavMode('reelshort')}
+            />
+          ) : navMode === 'manga' ? (
+            <MangaHub
+              onBackToCinema={() => handleSelectNavMode('cinema')}
+              onNavigateToSeries={() => handleSelectNavMode('series')}
+              onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+              onNavigateToAnime={() => handleSelectNavMode('anime')}
+              onNavigateToReelShort={() => handleSelectNavMode('reelshort')}
+            />
+          ) : navMode === 'reelshort' ? (
+            <ReelShortHub
+              onBackToCinema={() => handleSelectNavMode('cinema')}
+              onNavigateToSeries={() => handleSelectNavMode('series')}
+              onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+              onNavigateToAnime={() => handleSelectNavMode('anime')}
+              onNavigateToManga={() => handleSelectNavMode('manga')}
+            />
+          ) : (
+            <CinemaVODHub
+              initialCategory={navMode === 'series' ? 'series' : selectedCategory}
+              onPlayMovie={handlePlayMovie}
+              onNavigateToTv={() => handleSelectNavMode('livetv')}
+              onNavigateToAnime={() => handleSelectNavMode('anime')}
+              onNavigateToManga={() => handleSelectNavMode('manga')}
+              onNavigateToReelShort={() => handleSelectNavMode('reelshort')}
+              onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
+            />
+          )}
+        </main>
+
+        {/* 3. Mobile Thumb Navigation Dock */}
+        {!activeMovie && (
+          <MobileBottomDock
+            selectedCategory={selectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              refreshWatchlistCount();
+            }}
+            onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
+            watchlistCount={watchlistCount}
+            navMode={navMode}
+            onSelectNavMode={handleSelectNavMode}
+          />
+        )}
+      </div>
 
       {/* 4. AIOStreams Super-Addon Aggregator Modal */}
       <AIOStreamsModal

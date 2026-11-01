@@ -13,8 +13,10 @@ import {
   Rows,
   Zap,
   BookOpen,
-  Compass
+  Compass,
+  Clapperboard
 } from 'lucide-react';
+import { NavMode } from '../../utils/storage';
 
 interface NavbarProps {
   searchQuery: string;
@@ -26,8 +28,8 @@ interface NavbarProps {
   watchlistCount: number;
   viewMode: 'rails' | 'grid';
   onToggleViewMode: () => void;
-  navMode: 'cinema' | 'series' | 'livetv' | 'anime' | 'manga';
-  onSelectNavMode: (mode: 'cinema' | 'series' | 'livetv' | 'anime' | 'manga') => void;
+  navMode: NavMode;
+  onSelectNavMode: (mode: NavMode) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -163,6 +165,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <BookOpen className="w-3.5 h-3.5 text-emerald-300" />
             <span>Manga</span>
+          </button>
+
+          {/* 6. Dedicated ReelShort Short Dramas Hub */}
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('reelshort')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
+              navMode === 'reelshort'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Dedicated ReelShort Short Dramas (Zero Ads)"
+          >
+            <Clapperboard className="w-3.5 h-3.5 text-amber-300" />
+            <span>ReelShort</span>
           </button>
         </div>
       </div>

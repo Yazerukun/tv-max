@@ -22,7 +22,8 @@ import {
   Compass,
   X,
   RotateCcw,
-  BookOpen
+  BookOpen,
+  Clapperboard
 } from 'lucide-react';
 import { CINEMA_MOVIES, CinemaMovie, Episode } from '../../data/cinemaMovies';
 import { MovieDetailModal } from './MovieDetailModal';
@@ -45,6 +46,7 @@ interface CinemaVODHubProps {
   onNavigateToTv: () => void;
   onNavigateToAnime?: () => void;
   onNavigateToManga?: () => void;
+  onNavigateToReelShort?: () => void;
   onOpenAIOStreams?: () => void;
   initialCategory?: string;
 }
@@ -54,6 +56,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   onNavigateToTv,
   onNavigateToAnime,
   onNavigateToManga,
+  onNavigateToReelShort,
   onOpenAIOStreams,
   initialCategory,
 }) => {
@@ -549,6 +552,18 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
               >
                 <BookOpen className="w-3.5 h-3.5 text-emerald-200" />
                 <span>Manga Reader</span>
+              </button>
+            )}
+
+            {onNavigateToReelShort && (
+              <button
+                type="button"
+                onClick={onNavigateToReelShort}
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-lg shadow-amber-600/30 hover:scale-105 active:scale-95 border border-amber-400/40"
+                title="Switch to Dedicated ReelShort Short Dramas (Zero Ads)"
+              >
+                <Clapperboard className="w-3.5 h-3.5 text-amber-200" />
+                <span>ReelShort</span>
               </button>
             )}
 

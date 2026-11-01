@@ -3,6 +3,7 @@ import { Navbar } from './components/Navigation/Navbar';
 import { MobileBottomDock } from './components/Navigation/MobileBottomDock';
 import { CinemaVODHub } from './components/Cinema/CinemaVODHub';
 import { LiveTVHub } from './components/LiveTV/LiveTVHub';
+import { AnimeHub } from './components/Anime/AnimeHub';
 import { CinemaPlayer } from './components/Player/CinemaPlayer';
 import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
@@ -15,12 +16,13 @@ import {
   getStoredViewMode,
   saveStoredViewMode,
   getStoredNavMode,
-  saveStoredNavMode
+  saveStoredNavMode,
+  NavMode
 } from './utils/storage';
 
 export const App: React.FC = () => {
-  // Navigation Mode (Cinema VOD vs Dedicated Free Live TV Hub)
-  const [navMode, setNavMode] = useState<'cinema' | 'livetv'>(() => getStoredNavMode());
+  // Navigation Mode (Cinema / Movies vs Dedicated Free Live TV Hub vs Dedicated Anime Hub)
+  const [navMode, setNavMode] = useState<NavMode>(() => getStoredNavMode());
 
   // Currently streaming movie / episode state
   const [activeMovie, setActiveMovie] = useState<CinemaMovie | null>(null);
@@ -41,7 +43,7 @@ export const App: React.FC = () => {
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)
   const [playerSettings, setPlayerSettings] = useState<PlayerSettings>(() => getStoredPlayerSettings());
 
-  const handleSelectNavMode = useCallback((mode: 'cinema' | 'livetv') => {
+  const handleSelectNavMode = useCallback((mode: NavMode) => {
     setNavMode(mode);
     saveStoredNavMode(mode);
     if (activeMovie) {
@@ -152,7 +154,7 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 2. Main Viewport: Cinema Player vs Nuvio Media Catalog vs Dedicated Live TV Hub */}
+      {/* 2. Main Viewport: Cinema Player vs Movies Catalog vs Dedicated Live TV vs Dedicated Anime Hub */}
       <main className="flex-1 w-full relative">
         {activeMovie ? (
           <CinemaPlayer
@@ -165,10 +167,16 @@ export const App: React.FC = () => {
           />
         ) : navMode === 'livetv' ? (
           <LiveTVHub onBackToCinema={() => handleSelectNavMode('cinema')} />
+        ) : navMode === 'anime' ? (
+          <AnimeHub
+            onBackToCinema={() => handleSelectNavMode('cinema')}
+            onNavigateToLiveTv={() => handleSelectNavMode('livetv')}
+          />
         ) : (
           <CinemaVODHub
             onPlayMovie={handlePlayMovie}
             onNavigateToTv={() => handleSelectNavMode('livetv')}
+            onNavigateToAnime={() => handleSelectNavMode('anime')}
             onOpenAIOStreams={() => setIsAIOStreamsOpen(true)}
           />
         )}

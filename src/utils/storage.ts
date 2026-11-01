@@ -128,15 +128,17 @@ export function getMovieWatchProgress(movieId: string): WatchProgress | undefine
   return current.find((x) => x.movieId === movieId);
 }
 
-export function getStoredNavMode(): 'cinema' | 'livetv' {
+export type NavMode = 'cinema' | 'livetv' | 'anime';
+
+export function getStoredNavMode(): NavMode {
   try {
     const val = localStorage.getItem(STORAGE_KEYS.NAV_MODE);
-    return val === 'livetv' ? 'livetv' : 'cinema';
+    return val === 'livetv' || val === 'anime' ? val : 'cinema';
   } catch {
     return 'cinema';
   }
 }
 
-export function saveStoredNavMode(mode: 'cinema' | 'livetv'): void {
+export function saveStoredNavMode(mode: NavMode): void {
   localStorage.setItem(STORAGE_KEYS.NAV_MODE, mode);
 }

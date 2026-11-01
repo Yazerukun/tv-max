@@ -42,12 +42,14 @@ import {
 interface CinemaVODHubProps {
   onPlayMovie: (movie: CinemaMovie, episode?: Episode) => void;
   onNavigateToTv: () => void;
+  onNavigateToAnime?: () => void;
   onOpenAIOStreams?: () => void;
 }
 
 export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   onPlayMovie,
   onNavigateToTv,
+  onNavigateToAnime,
   onOpenAIOStreams,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -512,6 +514,18 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-200 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
+              </button>
+            )}
+
+            {onNavigateToAnime && (
+              <button
+                type="button"
+                onClick={onNavigateToAnime}
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-fuchsia-600 via-pink-600 to-purple-700 text-white shadow-lg shadow-fuchsia-600/30 hover:scale-105 active:scale-95 border border-fuchsia-400/40"
+                title="Switch to Dedicated Anime Hub (Yomi - Zero Ads)"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-fuchsia-200" />
+                <span>Anime Hub</span>
               </button>
             )}
 

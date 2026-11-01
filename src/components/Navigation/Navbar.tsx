@@ -24,8 +24,8 @@ interface NavbarProps {
   watchlistCount: number;
   viewMode: 'rails' | 'grid';
   onToggleViewMode: () => void;
-  navMode: 'cinema' | 'livetv';
-  onSelectNavMode: (mode: 'cinema' | 'livetv') => void;
+  navMode: 'cinema' | 'livetv' | 'anime';
+  onSelectNavMode: (mode: 'cinema' | 'livetv' | 'anime') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -82,12 +82,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Mode Switcher: Cinema VOD vs Dedicated Free Live TV Hub (Visible on all viewports) */}
+        {/* Mode Switcher: 3 Segregated Hubs (Movies vs Live TV vs Anime) */}
         <div className="flex items-center p-0.5 sm:p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-1 sm:ml-2">
+          {/* 1. Cinema / Movies */}
           <button
             type="button"
             onClick={() => onSelectNavMode('cinema')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
               navMode === 'cinema'
                 ? 'bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-md shadow-cyan-500/25 scale-105'
                 : 'text-slate-400 hover:text-white'
@@ -95,14 +96,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Browse Movies & Series Catalog"
           >
             <Film className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Cinema</span>
-            <span className="xs:hidden">Cinema</span>
+            <span>Movies</span>
           </button>
 
+          {/* 2. Free Live TV */}
           <button
             type="button"
             onClick={() => onSelectNavMode('livetv')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
               navMode === 'livetv'
                 ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md shadow-rose-500/30 scale-105'
                 : 'text-slate-400 hover:text-white'
@@ -115,6 +116,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
             </span>
+          </button>
+
+          {/* 3. Dedicated Anime Hub */}
+          <button
+            type="button"
+            onClick={() => onSelectNavMode('anime')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
+              navMode === 'anime'
+                ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-md shadow-fuchsia-500/30 scale-105'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Dedicated Anime Streaming Engine (Zero Ads)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-fuchsia-300" />
+            <span>Anime</span>
           </button>
         </div>
       </div>

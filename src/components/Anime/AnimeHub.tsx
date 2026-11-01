@@ -1,21 +1,20 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   Sparkles, 
   Search, 
   RotateCcw, 
   Maximize, 
   Minimize, 
-  ShieldCheck, 
-  ExternalLink, 
-  Flame, 
-  Calendar, 
-  Clock, 
   Film, 
   Tv, 
-  Layers, 
-  CheckCircle2,
+  Home, 
+  X,
+  ExternalLink,
   ChevronRight,
-  Compass
+  ShieldCheck,
+  CheckCircle2,
+  Expand,
+  Shrink
 } from 'lucide-react';
 
 interface AnimeHubProps {
@@ -23,226 +22,209 @@ interface AnimeHubProps {
   onNavigateToLiveTv?: () => void;
 }
 
-interface QuickAnime {
-  name: string;
-  query: string;
-  genre: string;
-}
-
-const POPULAR_ANIME_SHORTCUTS: QuickAnime[] = [
-  { name: 'One Piece', query: 'One Piece', genre: 'Shonen' },
-  { name: 'Solo Leveling', query: 'Solo Leveling', genre: 'Action' },
-  { name: 'Jujutsu Kaisen', query: 'Jujutsu Kaisen', genre: 'Supernatural' },
-  { name: 'Demon Slayer', query: 'Demon Slayer Kimetsu no Yaiba', genre: 'Action' },
-  { name: 'Attack on Titan', query: 'Attack on Titan', genre: 'Dark Fantasy' },
-  { name: 'Chainsaw Man', query: 'Chainsaw Man', genre: 'Supernatural' },
-  { name: 'Bleach', query: 'Bleach Thousand Year Blood War', genre: 'Shonen' },
-  { name: 'Naruto Shippuden', query: 'Naruto Shippuden', genre: 'Ninja' },
-  { name: 'Dragon Ball', query: 'Dragon Ball Super', genre: 'Action' },
-  { name: 'Spy x Family', query: 'Spy x Family', genre: 'Comedy' },
-];
-
-const ANIME_CATEGORIES = [
-  { id: 'home', label: 'All Anime', url: 'https://yomi.to/' },
-  { id: 'trending', label: '🔥 Trending', url: 'https://yomi.to/browse?sort=TRENDING_DESC' },
-  { id: 'top', label: '🏆 Top Rated', url: 'https://yomi.to/top' },
-  { id: 'seasonal', label: '📅 Seasonal', url: 'https://yomi.to/seasonal' },
-  { id: 'schedule', label: '🗓️ Schedule', url: 'https://yomi.to/schedule' },
-  { id: 'action', label: '⚔️ Action', url: 'https://yomi.to/browse?genre=Action' },
-  { id: 'isekai', label: '🌌 Isekai', url: 'https://yomi.to/browse?genre=Isekai' },
-  { id: 'romance', label: '💖 Romance', url: 'https://yomi.to/browse?genre=Romance' },
-  { id: 'fantasy', label: '🧙 Fantasy', url: 'https://yomi.to/browse?genre=Fantasy' },
-  { id: 'movies', label: '🍿 Anime Movies', url: 'https://yomi.to/browse?format=MOVIE' },
+const QUICK_SHORTCUTS = [
+  { label: '🔥 Trending', url: 'https://yomi.to/browse?sort=TRENDING_DESC' },
+  { label: '🏆 Top Rated', url: 'https://yomi.to/top' },
+  { label: '📅 Seasonal', url: 'https://yomi.to/seasonal' },
+  { label: '🗓️ Schedule', url: 'https://yomi.to/schedule' },
+  { label: 'One Piece', url: 'https://yomi.to/search?q=One+Piece' },
+  { label: 'Solo Leveling', url: 'https://yomi.to/search?q=Solo+Leveling' },
+  { label: 'Jujutsu Kaisen', url: 'https://yomi.to/search?q=Jujutsu+Kaisen' },
+  { label: 'Demon Slayer', url: 'https://yomi.to/search?q=Demon+Slayer' },
+  { label: 'Bleach', url: 'https://yomi.to/search?q=Bleach' },
+  { label: 'Attack on Titan', url: 'https://yomi.to/search?q=Attack+on+Titan' },
 ];
 
 export const AnimeHub: React.FC<AnimeHubProps> = ({ onBackToCinema, onNavigateToLiveTv }) => {
   const [currentUrl, setCurrentUrl] = useState<string>('https://yomi.to/');
-  const [activeCategory, setActiveCategory] = useState<string>('home');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [iframeKey, setIframeKey] = useState<number>(1);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isFullView, setIsFullView] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 2500);
   }, []);
 
-  // Navigate to category
-  const handleSelectCategory = useCallback((catId: string, url: string) => {
-    setActiveCategory(catId);
+  // Top-level navigation redirect guard (prevents ad networks from redirecting parent TV MAX page)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // If a script tries to navigate parent page, show browser confirmation prompt
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Keyboard shortcut: Escape exits Full View mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullView) {
+        setIsFullView(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullView]);
+
+  // Navigate to URL
+  const handleNavigate = useCallback((url: string, label?: string) => {
     setCurrentUrl(url);
     setIsLoading(true);
     setIframeKey((k) => k + 1);
-  }, []);
+    if (label) showToast(`Loading ${label}...`);
+  }, [showToast]);
 
   // Search anime
   const handleSearchSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     const url = `https://yomi.to/search?q=${encodeURIComponent(searchQuery.trim())}`;
-    setCurrentUrl(url);
-    setActiveCategory('');
-    setIsLoading(true);
-    setIframeKey((k) => k + 1);
-    showToast(`Searching "${searchQuery.trim()}" on Yomi...`);
-  }, [searchQuery, showToast]);
-
-  // Launch popular shortcut
-  const handleQuickLaunch = useCallback((anime: QuickAnime) => {
-    const url = `https://yomi.to/search?q=${encodeURIComponent(anime.query)}`;
-    setCurrentUrl(url);
-    setActiveCategory('');
-    setIsLoading(true);
-    setIframeKey((k) => k + 1);
-    showToast(`Loading ${anime.name}...`);
-  }, [showToast]);
+    handleNavigate(url, `"${searchQuery.trim()}"`);
+  }, [searchQuery, handleNavigate]);
 
   // Reload iframe
   const handleReload = useCallback(() => {
     setIsLoading(true);
     setIframeKey((k) => k + 1);
-    showToast('Refreshing anime stream...');
+    showToast('Reloading Yomi stream...');
   }, [showToast]);
 
-  // Toggle fullscreen
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
-    } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
-    }
-  }, []);
+  // Reset to Home
+  const handleGoHome = useCallback(() => {
+    handleNavigate('https://yomi.to/', 'Yomi Home');
+  }, [handleNavigate]);
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#03050a] text-white flex flex-col pb-20 md:pb-6">
-      {/* 1. Header Bar: Anime Hub Branding & Status Controls */}
-      <div className="border-b border-white/10 bg-[#060812]/90 backdrop-blur-xl px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-fuchsia-500 via-pink-500 to-purple-600 p-0.5 shadow-lg shadow-fuchsia-500/20 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-black text-lg tracking-tight uppercase bg-gradient-to-r from-fuchsia-400 via-pink-300 to-purple-300 bg-clip-text text-transparent">
-                Yomi Anime Hub
-              </h1>
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>ZERO POPUP ADS</span>
-              </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 uppercase">
-                SUB & DUB 1080P
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-              Dedicated Anime Engine • Auto-Skip Fillers • Seasonal Releases • Ad-Shielded Sandbox
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Search & Actions */}
-        <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
-          {/* Quick Search */}
-          <form onSubmit={handleSearchSubmit} className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-fuchsia-400" />
-            <input
-              type="text"
-              placeholder="Search anime title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#080b18] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-fuchsia-500/50 transition"
-            />
-          </form>
-
-          {/* Reload Stream */}
-          <button
-            onClick={handleReload}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
-            title="Reload Stream"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Fullscreen Button */}
-          <button
-            onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
-            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-          >
-            {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
-          </button>
-
-          {/* Mode Switchers */}
+    <div className={`w-full bg-[#03050a] flex flex-col ${
+      isFullView 
+        ? 'fixed inset-0 z-50 w-screen h-screen' 
+        : 'h-[calc(100vh-4rem-3.5rem)] md:h-[calc(100vh-4rem)]'
+    }`}>
+      {/* 1. Sleek Compact Control Strip (Only 42px height so yomi.to gets 100% of the screen) */}
+      <div className="h-11 bg-[#060812] border-b border-white/10 px-3 sm:px-6 flex items-center justify-between gap-2.5 z-30 select-none flex-shrink-0">
+        
+        {/* Left: Hub Switchers & Branding */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {onBackToCinema && (
             <button
               onClick={onBackToCinema}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition"
+              title="Back to Cinema Movies"
             >
               <Film className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Cinema</span>
+              <span className="hidden sm:inline">Cinema</span>
             </button>
           )}
 
           {onNavigateToLiveTv && (
             <button
               onClick={onNavigateToLiveTv}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition"
+              title="Watch Free Live TV"
             >
               <Tv className="w-3.5 h-3.5 text-rose-400" />
-              <span>Live TV</span>
+              <span className="hidden sm:inline">Live TV</span>
             </button>
           )}
+
+          <div className="h-4 w-px bg-white/10 mx-0.5 hidden xs:block" />
+
+          {/* Yomi Brand Pill */}
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-xl bg-fuchsia-500/15 border border-fuchsia-500/30">
+            <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
+            <span className="text-xs font-black text-fuchsia-200 tracking-tight">
+              YOMI ANIME
+            </span>
+          </div>
+        </div>
+
+        {/* Center: Search & Quick Shortcuts */}
+        <div className="flex items-center gap-2 flex-1 max-w-2xl min-w-0 mx-2">
+          {/* Quick Search */}
+          <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-56 flex-shrink-0">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-fuchsia-400" />
+            <input
+              type="text"
+              placeholder="Search anime..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-2.5 py-1 rounded-lg bg-[#0a0d1f] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-fuchsia-500/50"
+            />
+          </form>
+
+          {/* Quick Scrollable Shortcut Chips */}
+          <div className="hidden md:flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px] min-w-0">
+            {QUICK_SHORTCUTS.slice(0, 6).map((item) => (
+              <button
+                key={item.label}
+                onClick={() => handleNavigate(item.url, item.label)}
+                className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 whitespace-nowrap text-[11px] font-medium transition"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Home */}
+          <button
+            onClick={handleGoHome}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
+            title="Go to Yomi Home"
+          >
+            <Home className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Reload */}
+          <button
+            onClick={handleReload}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
+            title="Reload Stream"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Full View Toggle (Edge-to-Edge Pure View) */}
+          <button
+            onClick={() => setIsFullView((prev) => !prev)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+              isFullView
+                ? 'bg-fuchsia-600 text-white shadow-lg shadow-fuchsia-600/30'
+                : 'bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white'
+            }`}
+            title={isFullView ? 'Exit Edge-to-Edge View' : 'Full Screen Edge-to-Edge (100% Pure Yomi View)'}
+          >
+            {isFullView ? (
+              <>
+                <Shrink className="w-3.5 h-3.5 text-white" />
+                <span className="hidden sm:inline">Exit Full</span>
+              </>
+            ) : (
+              <>
+                <Expand className="w-3.5 h-3.5 text-fuchsia-400" />
+                <span className="hidden sm:inline">Full View</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* 2. Secondary Filter Bar: Categories & Popular Anime Shortcuts */}
-      <div className="bg-[#04060e] border-b border-white/5 px-4 sm:px-8 py-2 flex flex-col gap-2">
-        {/* Categories Rail */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-          {ANIME_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => handleSelectCategory(cat.id, cat.url)}
-              className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                activeCategory === cat.id
-                  ? 'bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white shadow-md shadow-fuchsia-500/25 scale-105'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Popular Anime Direct Shortcuts */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px]">
-          <span className="text-slate-500 font-mono font-bold uppercase tracking-wider flex-shrink-0 text-[10px] mr-1">
-            ⚡ Quick Launch:
-          </span>
-          {POPULAR_ANIME_SHORTCUTS.map((anime) => (
-            <button
-              key={anime.name}
-              onClick={() => handleQuickLaunch(anime)}
-              className="px-2.5 py-0.5 rounded-lg bg-fuchsia-950/30 hover:bg-fuchsia-900/50 text-fuchsia-300 hover:text-white border border-fuchsia-500/20 whitespace-nowrap font-medium transition"
-            >
-              {anime.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 3. Main Stage: Isolated & Sandboxed Yomi Stream Engine */}
-      <div ref={containerRef} className="flex-1 w-full max-w-[1720px] mx-auto p-2 sm:p-4 flex flex-col relative">
+      {/* 2. Main Stage: 100% Full Viewport Unsandboxed Yomi Stream Engine */}
+      <div className="flex-1 w-full h-full relative bg-[#04060c] overflow-hidden">
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="absolute top-6 right-6 z-40 animate-fadeIn pointer-events-none">
-            <div className="px-3.5 py-1.5 rounded-xl bg-black/85 backdrop-blur-xl border border-fuchsia-500/40 text-fuchsia-200 text-xs font-bold flex items-center gap-2 shadow-2xl">
+          <div className="absolute top-4 right-4 z-40 animate-fadeIn pointer-events-none">
+            <div className="px-3.5 py-1.5 rounded-xl bg-black/90 backdrop-blur-xl border border-fuchsia-500/40 text-fuchsia-200 text-xs font-bold flex items-center gap-2 shadow-2xl">
               <CheckCircle2 className="w-4 h-4 text-fuchsia-400" />
               <span>{toastMessage}</span>
             </div>
@@ -251,29 +233,68 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({ onBackToCinema, onNavigateTo
 
         {/* Loading Overlay */}
         {isLoading && (
-          <div className="absolute inset-0 bg-[#03050a]/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 m-2 sm:m-4 rounded-3xl border border-white/5">
-            <div className="w-12 h-12 rounded-full border-4 border-fuchsia-500/20 border-t-fuchsia-500 animate-spin" />
-            <p className="mt-3 text-xs font-mono font-bold text-fuchsia-300 tracking-wider">
-              Shielding Anime Engine • Zero Ads Enforced...
+          <div className="absolute inset-0 bg-[#04060c]/80 backdrop-blur-xs flex flex-col items-center justify-center z-20 pointer-events-none">
+            <div className="w-10 h-10 rounded-full border-3 border-fuchsia-500/20 border-t-fuchsia-500 animate-spin" />
+            <p className="mt-2 text-xs font-mono font-bold text-fuchsia-300 tracking-wider">
+              Connecting Yomi Anime Engine...
             </p>
           </div>
         )}
 
-        {/* Sandboxed Ad-Shielded Iframe Container */}
-        <div className="flex-1 w-full h-[calc(100vh-13.5rem)] sm:h-[calc(100vh-12rem)] rounded-3xl overflow-hidden border border-white/10 bg-[#070914] shadow-2xl relative">
-          <iframe
-            key={iframeKey}
-            ref={iframeRef}
-            src={currentUrl}
-            title="Yomi Anime Player"
-            className="w-full h-full border-0 select-none"
-            // Strict ad-shield sandbox: omit allow-top-navigation and allow-popups so ads CANNOT escape or hijack tabs
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            referrerPolicy="no-referrer-when-downgrade"
-            onLoad={() => setIsLoading(false)}
-          />
-        </div>
+        {/* Floating Mini HUD in Full View Mode */}
+        {isFullView && (
+          <div className="absolute top-3 right-4 z-40 flex items-center gap-1.5 bg-black/85 backdrop-blur-xl border border-white/15 px-2.5 py-1.5 rounded-2xl shadow-2xl opacity-70 hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => setIsFullView(false)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-bold shadow transition"
+              title="Exit Full View (or press Esc)"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Exit Full View</span>
+            </button>
+
+            {onBackToCinema && (
+              <button
+                onClick={onBackToCinema}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                title="Cinema Movies"
+              >
+                <Film className="w-3.5 h-3.5 text-cyan-400" />
+              </button>
+            )}
+
+            {onNavigateToLiveTv && (
+              <button
+                onClick={onNavigateToLiveTv}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                title="Live TV"
+              >
+                <Tv className="w-3.5 h-3.5 text-rose-400" />
+              </button>
+            )}
+
+            <button
+              onClick={handleReload}
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+              title="Reload Stream"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* 100% Full Viewport Unsandboxed Iframe (No Sandbox = No Player Crash) */}
+        <iframe
+          key={iframeKey}
+          ref={iframeRef}
+          src={currentUrl}
+          title="Yomi Anime"
+          className="w-full h-full border-0 select-none block bg-[#04060c]"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          referrerPolicy="no-referrer-when-downgrade"
+          loading="eager"
+          onLoad={() => setIsLoading(false)}
+        />
       </div>
     </div>
   );

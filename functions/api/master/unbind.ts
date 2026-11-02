@@ -1,13 +1,11 @@
-import { getAccounts, saveAccounts, corsHeaders } from '../_store';
+import { getAccountById, upsertAccount, corsHeaders } from '../_store';
 
 export const onRequestPost: PagesFunction = async (context) => {
   try {
     const data: any = await context.request.json();
     const accountId = data.account_id;
 
-    const accounts = await getAccounts(context.env);
-    const acc = accounts.find(a => a.id === accountId);
-
+    const acc = await getAccountById(accountId, context.env);
     if (!acc) {
       return new Response(JSON.stringify({ success: false, message: 'Account not found' }), {
         status: 200,
@@ -18,7 +16,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     acc.bound_hardware_hash = null;
     acc.bound_ip = null;
     acc.status = 'UNBOUND_READY';
-    await saveAccounts(accounts, context.env);
+    await upsertAccount(acc, context.env);
 
     return new Response(JSON.stringify({
       success: true,

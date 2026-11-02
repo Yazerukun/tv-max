@@ -1,4 +1,4 @@
-import { getAccounts, saveAccounts, corsHeaders, VendoAccount } from '../_store';
+import { upsertAccount, corsHeaders, VendoAccount } from '../_store';
 
 export const onRequestPost: PagesFunction = async (context) => {
   try {
@@ -27,9 +27,7 @@ export const onRequestPost: PagesFunction = async (context) => {
       status: 'UNBOUND_READY'
     };
 
-    const accounts = await getAccounts(context.env);
-    accounts.unshift(newAcc);
-    await saveAccounts(accounts, context.env);
+    await upsertAccount(newAcc, context.env);
 
     return new Response(JSON.stringify({ success: true, account: newAcc }), {
       status: 200,

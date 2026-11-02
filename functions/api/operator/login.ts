@@ -1,4 +1,4 @@
-import { getAccounts, saveAccounts, corsHeaders } from '../_store';
+import { getAccountByCredentials, upsertAccount, corsHeaders } from '../_store';
 
 export const onRequestPost: PagesFunction = async (context) => {
   try {
@@ -8,8 +8,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     const clientHwHash = data.hardware_hash || 'web-puf-client';
     const clientIp = context.request.headers.get('CF-Connecting-IP') || '127.0.0.1';
 
-    const accounts = await getAccounts(context.env);
-    const account = accounts.find(a => a.username.toLowerCase() === u.toLowerCase() && a.password === p);
+    const account = await getAccountByCredentials(u, p, context.env);
 
     if (!account) {
       return new Response(JSON.stringify({ success: false, message: 'Invalid Username or PIN.' }), {
@@ -38,7 +37,7 @@ export const onRequestPost: PagesFunction = async (context) => {
       account.bound_hardware_hash = clientHwHash;
       account.bound_ip = clientIp;
       account.status = 'ACTIVE';
-      await saveAccounts(accounts, context.env);
+      await upsertAccount(account, context.env);
       return new Response(JSON.stringify({
         success: true,
         message: 'Device paired and activated successfully!',
@@ -52,7 +51,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     // Check expiration
     if (account.expires_at && now > account.expires_at) {
       account.status = 'EXPIRED';
-      await saveAccounts(accounts, context.env);
+      await upsertAccount(account, context.env);
       return new Response(JSON.stringify({
         success: false,
         message: 'This account subscription has expired. Please renew with Ian via GCash.',
@@ -66,7 +65,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     // Re-login on authorized machine
     account.status = 'ACTIVE';
     account.bound_ip = clientIp;
-    await saveAccounts(accounts, context.env);
+    await upsertAccount(account, context.env);
 
     return new Response(JSON.stringify({
       success: true,

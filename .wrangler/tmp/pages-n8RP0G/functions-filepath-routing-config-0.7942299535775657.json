@@ -1,0 +1,149 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/master/accounts",
+      "mountPath": "/api/master",
+      "method": "GET",
+      "module": [
+        "api/master/accounts.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/master/accounts",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/accounts.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/delete",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/delete.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/delete",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/delete.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/master/freeze",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/freeze.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/freeze",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/freeze.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/master/generate",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/generate.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/generate",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/generate.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/master/login",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/login.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/login",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/login.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/master/renew",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/renew.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/renew",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/renew.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/master/unbind",
+      "mountPath": "/api/master",
+      "method": "OPTIONS",
+      "module": [
+        "api/master/unbind.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/master/unbind",
+      "mountPath": "/api/master",
+      "method": "POST",
+      "module": [
+        "api/master/unbind.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/operator/login",
+      "mountPath": "/api/operator",
+      "method": "OPTIONS",
+      "module": [
+        "api/operator/login.ts:onRequestOptions"
+      ]
+    },
+    {
+      "routePath": "/api/operator/login",
+      "mountPath": "/api/operator",
+      "method": "POST",
+      "module": [
+        "api/operator/login.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/operator/status",
+      "mountPath": "/api/operator",
+      "method": "GET",
+      "module": [
+        "api/operator/status.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/operator/status",
+      "mountPath": "/api/operator",
+      "method": "OPTIONS",
+      "module": [
+        "api/operator/status.ts:onRequestOptions"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

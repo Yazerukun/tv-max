@@ -42,12 +42,6 @@ export const VendoActivationModal: React.FC<VendoActivationModalProps> = ({
     }
   };
 
-  const handleFillPreset = (u: string, p: string) => {
-    setUsername(u);
-    setPin(p);
-    setErrorMessage(null);
-  };
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-fadeIn">
       <div className="w-full max-w-md bg-[#0a0e1a] border border-cyan-500/40 rounded-3xl shadow-2xl shadow-cyan-950/60 p-6 sm:p-8 space-y-6 relative overflow-hidden">
@@ -139,27 +133,6 @@ export const VendoActivationModal: React.FC<VendoActivationModalProps> = ({
           <p>
             Once activated, this machine stays unlocked permanently across all reboots and power outages. Connecting customers stream with zero login.
           </p>
-        </div>
-
-        {/* Quick Presets for Testing */}
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-          <span>Quick Demo Presets:</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleFillPreset('trial-juan', '123')}
-              className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono"
-            >
-              1-Day Trial
-            </button>
-            <button
-              type="button"
-              onClick={() => handleFillPreset('pro-pedro', '300')}
-              className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono"
-            >
-              30-Day Pro
-            </button>
-          </div>
         </div>
 
       </div>

@@ -11,6 +11,9 @@ body {
   background-color: #07080c;
   color: #f1f5f9;
   user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 /* Custom Cinema Scrollbars */
@@ -300,3 +303,13 @@ input[type='range'].uiverse-slider::-webkit-slider-thumb:hover {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mobile Safe Area Insets (iOS Safari & Android Gesture Navigation) */
+.safe-area-top {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+.safe-area-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+

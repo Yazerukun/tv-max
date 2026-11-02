@@ -314,7 +314,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] pb-28 md:pb-16 bg-[#04060c] text-slate-100 overflow-x-hidden selection:bg-cyan-500 selection:text-black">
+    <div className="relative min-h-[calc(100dvh-3.5rem)] md:min-h-screen pb-28 md:pb-16 bg-[#04060c] text-slate-100 overflow-x-hidden selection:bg-cyan-500 selection:text-black">
       {/* 1. TV-MAX TOP TELEMETRY RIBBON */}
       <div className="px-4 sm:px-8 pt-4 pb-2">
         <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-purple-950/40 border border-cyan-500/25 backdrop-blur-xl shadow-lg shadow-cyan-950/20">
@@ -515,58 +515,6 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Scrollable Category Selector Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {onNavigateToTv && (
-              <button
-                type="button"
-                onClick={onNavigateToTv}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 text-white shadow-lg shadow-rose-600/30 hover:scale-105 active:scale-95 border border-rose-400/40"
-                title="Switch to 24/7 Free Live TV Channels Hub"
-              >
-                <Tv className="w-3.5 h-3.5 text-rose-200" />
-                <span>Live TV</span>
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-200 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                </span>
-              </button>
-            )}
-
-            {onNavigateToAnime && (
-              <button
-                type="button"
-                onClick={onNavigateToAnime}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-fuchsia-600 via-pink-600 to-purple-700 text-white shadow-lg shadow-fuchsia-600/30 hover:scale-105 active:scale-95 border border-fuchsia-400/40"
-                title="Switch to Dedicated Anime Hub (Yomi - Zero Ads)"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-fuchsia-200" />
-                <span>Anime Hub</span>
-              </button>
-            )}
-
-            {onNavigateToManga && (
-              <button
-                type="button"
-                onClick={onNavigateToManga}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 border border-emerald-400/40"
-                title="Switch to Dedicated Manhwa & Manga Reader (MangaFire)"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-emerald-200" />
-                <span>Manga Reader</span>
-              </button>
-            )}
-
-            {onNavigateToReelShort && (
-              <button
-                type="button"
-                onClick={onNavigateToReelShort}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all duration-200 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-lg shadow-amber-600/30 hover:scale-105 active:scale-95 border border-amber-400/40"
-                title="Switch to Dedicated ReelShort Short Dramas (Zero Ads)"
-              >
-                <Clapperboard className="w-3.5 h-3.5 text-amber-200" />
-                <span>ReelShort</span>
-              </button>
-            )}
-
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.id;

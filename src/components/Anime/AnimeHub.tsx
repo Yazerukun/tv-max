@@ -115,7 +115,7 @@ export const AnimeHub: React.FC<AnimeHubProps> = ({
     <div className={`w-full bg-[#03050a] flex flex-col ${
       isFullView 
         ? 'fixed inset-0 z-50 w-screen h-screen' 
-        : 'h-[calc(100vh-4rem-3.5rem)] md:h-[calc(100vh-4rem)]'
+        : 'h-[calc(100dvh-7rem)] md:h-screen'
     }`}>
       {/* 1. Sleek Compact Control Strip (Only 42px height so yomi.to gets 100% of the screen) */}
       <div className="h-11 bg-[#060812] border-b border-white/10 px-3 sm:px-6 flex items-center justify-between gap-2.5 z-30 select-none flex-shrink-0">

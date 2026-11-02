@@ -72,13 +72,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* 2. Right: Quick Search, Watchlist, Servers */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {/* Spotlight Search Launcher */}
         {onOpenSpotlight && (
           <button
             type="button"
             onClick={onOpenSpotlight}
-            className="w-8 h-8 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 flex items-center justify-center transition-all active:scale-95 shadow-sm"
+            className="w-9 h-9 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 flex items-center justify-center transition-all active:scale-90 shadow-sm cursor-pointer"
             title="Search Movies, Anime, Series (⌘K)"
           >
             <Search className="w-4 h-4 text-cyan-400" />
@@ -89,14 +89,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={() => onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist')}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all active:scale-90 cursor-pointer ${
             selectedCategory === 'watchlist'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/30 scale-105'
               : 'bg-white/5 text-slate-300 border border-white/10'
           }`}
           title="Watchlist"
         >
-          <Bookmark className="w-3.5 h-3.5 text-amber-400" />
+          <Bookmark className="w-4 h-4 text-amber-400" />
           {watchlistCount > 0 && (
             <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-black ${
               selectedCategory === 'watchlist' ? 'bg-black text-amber-300' : 'bg-amber-500/20 text-amber-300'
@@ -110,10 +110,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           type="button"
           onClick={onOpenAIOStreams}
-          className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 flex items-center justify-center transition-all active:scale-95 shadow-sm"
+          className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 flex items-center justify-center transition-all active:scale-90 shadow-sm cursor-pointer"
           title="TV-MAX Stream Servers"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <SlidersHorizontal className="w-4 h-4" />
         </button>
       </div>
     </header>

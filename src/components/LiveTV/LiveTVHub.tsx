@@ -365,7 +365,7 @@ export const LiveTVHub: React.FC<LiveTVHubProps> = ({ onBackToCinema }) => {
   }, []);
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#03050a] text-white flex flex-col pb-20 md:pb-8">
+    <div className="min-h-[calc(100dvh-3.5rem)] md:min-h-screen bg-[#03050a] text-white flex flex-col pb-28 md:pb-8">
       {/* 1. Header Bar: Live TV Status & Quick Stats */}
       <div className="border-b border-white/10 bg-[#060812]/80 backdrop-blur-xl px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

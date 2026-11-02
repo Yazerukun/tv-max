@@ -173,9 +173,26 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
               <p className="text-xs text-slate-400">TV-MAX SaaS Automated Fleet Authority</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={() => {
+                if (window.confirm('Reset this device license? The One-Time Login activation modal will appear immediately.')) {
+                  localStorage.removeItem('tvmax_license_ticket_v1');
+                  localStorage.removeItem('tvmax_monotonic_highwater_v1');
+                  window.location.href = '/';
+                }
+              }}
+              className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+              title="Reset license on this device to test the one-time activation modal"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Test Login Modal</span>
+            </button>
+            <button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Step 1: Password Gate */}

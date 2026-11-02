@@ -63,6 +63,13 @@ export const App: React.FC = () => {
   const [isContinueWatchingOpen, setIsContinueWatchingOpen] = useState<boolean>(false);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState<boolean>(false);
 
+  // Quick reset flag to test One-Time Activation modal: ?reset=true or ?logout=true
+  if (typeof window !== 'undefined' && (window.location.search.includes('reset=true') || window.location.search.includes('logout=true'))) {
+    localStorage.removeItem('tvmax_license_ticket_v1');
+    localStorage.removeItem('tvmax_monotonic_highwater_v1');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   // TV-MAX Enterprise Vendo Licensing State
   const [licensingState, setLicensingState] = useState<LicensingState>(() => getInitialLicensingState());
   const isDirectAdmin = typeof window !== 'undefined' && (

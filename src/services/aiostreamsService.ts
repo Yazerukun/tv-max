@@ -59,12 +59,12 @@ export async function resolveRealtimeStreams(
               else if (/720p/i.test(rawTitle)) quality = '720p';
 
               servers.push({
-                id: `aio-debrid-${idx}`,
-                name: `[AIO Real-Debrid] ${quality} Uncapped Direct`,
+                id: `tvmax-debrid-${idx}`,
+                name: `[TV-MAX Ultra] ${quality} Uncapped Direct`,
                 url: stream.url,
                 type: stream.url.includes('.m3u8') ? 'hls' : 'mp4',
                 quality: quality,
-                provider: 'Real-Debrid CDN',
+                provider: 'TV-MAX VIP Cloud',
                 speed: '95 MB/s',
                 latency: `${latencyMs}ms`,
                 isVerified: true

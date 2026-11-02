@@ -315,7 +315,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] pb-28 md:pb-16 bg-[#04060c] text-slate-100 overflow-x-hidden selection:bg-cyan-500 selection:text-black">
-      {/* 1. NUVIO & AIOSTREAMS TOP TELEMETRY RIBBON */}
+      {/* 1. TV-MAX TOP TELEMETRY RIBBON */}
       <div className="px-4 sm:px-8 pt-4 pb-2">
         <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-purple-950/40 border border-cyan-500/25 backdrop-blur-xl shadow-lg shadow-cyan-950/20">
           <div className="flex items-center gap-3">
@@ -325,7 +325,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-black text-white tracking-wider uppercase">
-                  Nuvio Mobile & AIOStreams v2.37.0
+                  TV-MAX Ultra High-Speed Cinema Engine
                 </span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />
@@ -333,11 +333,11 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 </span>
                 <span className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
-                  {isLiveLoading ? 'Syncing Cinemeta...' : `Cinemeta Live (${allCatalogMovies.length} Streamable Titles)`}
+                  {isLiveLoading ? 'Syncing Catalog...' : `TV-MAX Catalog (${allCatalogMovies.length} Titles)`}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">
-                Multi-server scraper failover, Stremio manifests & direct 4K CDN playback (Zero APK Required)
+                Multi-server failover & direct 4K high-speed streaming (Zero Buffering)
               </p>
             </div>
           </div>
@@ -377,7 +377,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition flex items-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>AIO Addons</span>
+                <span>Stream Servers</span>
               </button>
             )}
           </div>
@@ -855,7 +855,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                    Nuvio Cinemeta Live Trending Movies
+                    TV-MAX Live Trending Movies
                   </h2>
                   <span className="text-[10px] font-mono font-bold text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 flex items-center gap-1 shadow-sm">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
@@ -1402,7 +1402,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                 {isSearchingLive && (
                   <span className="text-xs font-normal text-cyan-400 font-mono flex items-center gap-1.5 ml-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Searching Live Cinemeta...
+                    Searching TV-MAX Catalog...
                   </span>
                 )}
               </h2>

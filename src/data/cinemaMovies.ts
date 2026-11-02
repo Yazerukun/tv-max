@@ -73,40 +73,40 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     servers: [
       { 
         id: 'srv-endgame-1', 
-        name: '[AIO Torrentio] 4K 2160p HDR Master', 
+        name: '[TV-MAX Ultra] 4K 2160p HDR Master', 
         url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', 
         type: 'hls', 
         quality: '4K HDR', 
-        provider: 'Torrentio', 
+        provider: 'TV-MAX Core', 
         speed: '48 MB/s', 
         latency: '18ms', 
         isVerified: true 
       },
       { 
         id: 'srv-endgame-2', 
-        name: '[AIO MediaFusion] 1080p FHD 60fps', 
+        name: '[TV-MAX Mirror 2] 1080p FHD 60fps', 
         url: 'https://vjs.zencdn.net/v/oceans.mp4', 
         type: 'mp4', 
         quality: '1080p', 
-        provider: 'MediaFusion', 
+        provider: 'TV-MAX Core', 
         speed: '25 MB/s', 
         latency: '24ms', 
         isVerified: true 
       },
       { 
         id: 'srv-endgame-3', 
-        name: '[AIO Nuvio Edge] Direct HLS CDN', 
+        name: '[TV-MAX VIP CDN] Direct HLS CDN', 
         url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', 
         type: 'hls', 
         quality: '1080p', 
-        provider: 'Nuvio VIP', 
+        provider: 'TV-MAX VIP', 
         speed: '60 MB/s', 
         latency: '12ms', 
         isVerified: true 
       },
       { 
         id: 'srv-endgame-4', 
-        name: '[AIO WebEmbed] Zero-Buffer Cinema', 
+        name: '[TV-MAX Web Cinema] Zero-Buffer Cinema', 
         url: 'https://www.youtube-nocookie.com/embed/TcMBFSGVi1c?autoplay=1&mute=0&enablejsapi=1&playsinline=1', 
         type: 'embed', 
         quality: '4K', 
@@ -135,8 +135,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Matt Smith', 'Emma D\'Arcy', 'Olivia Cooke', 'Rhys Ifans', 'Steve Toussaint'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-hotd-1', name: '[AIO Torrentio] 4K 2160p Dolby Vision', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'Torrentio', speed: '55 MB/s', isVerified: true },
-      { id: 'srv-hotd-2', name: '[AIO Nuvio Edge] 1080p Ultra CDN', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Nuvio VIP', isVerified: true },
+      { id: 'srv-hotd-1', name: '[TV-MAX Ultra] 4K 2160p Dolby Vision', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core', speed: '55 MB/s', isVerified: true },
+      { id: 'srv-hotd-2', name: '[TV-MAX VIP CDN] 1080p Ultra CDN', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX VIP', isVerified: true },
     ],
     seasons: [
       {
@@ -151,8 +151,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '66m',
             overview: 'Viserys hosts a tournament to celebrate the birth of his second child. Rhaenyra welcomes her uncle Daemon back to King\'s Landing.',
             servers: [
-              { id: 'hotd-s1e1-1', name: '[AIO Torrentio] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'Torrentio' },
-              { id: 'hotd-s1e1-2', name: '[AIO Direct CDN] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Direct CDN' }
+              { id: 'hotd-s1e1-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core' },
+              { id: 'hotd-s1e1-2', name: '[TV-MAX Direct CDN] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Direct' }
             ]
           },
           {
@@ -163,7 +163,7 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '54m',
             overview: 'Rhaenyra disrupts the Small Council. Daemon seizes Dragonstone and steals a dragon egg.',
             servers: [
-              { id: 'hotd-s1e2-1', name: '[AIO Torrentio] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K', provider: 'Torrentio' }
+              { id: 'hotd-s1e2-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core' }
             ]
           },
           {
@@ -174,7 +174,7 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '63m',
             overview: 'Daemon and the Sea Snake battle the Crabfeeder. The realm celebrates Aegon\'s second name day.',
             servers: [
-              { id: 'hotd-s1e3-1', name: '[AIO Torrentio] 1080p', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Torrentio' }
+              { id: 'hotd-s1e3-1', name: '[TV-MAX Ultra] 1080p', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Core' }
             ]
           }
         ]
@@ -200,8 +200,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Millie Bobby Brown', 'Finn Wolfhard', 'Winona Ryder', 'David Harbour', 'Gaten Matarazzo'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-st-1', name: '[AIO Torrentio] 4K 2160p HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'Torrentio', isVerified: true },
-      { id: 'srv-st-2', name: '[AIO MediaFusion] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', isVerified: true },
+      { id: 'srv-st-1', name: '[TV-MAX Ultra] 4K 2160p HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-st-2', name: '[TV-MAX Mirror 2] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     seasons: [
       {
@@ -216,8 +216,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '76m',
             overview: 'El struggles to fit in at school in California. Back in Hawkins, the high school boys join an intense D&D campaign.',
             servers: [
-              { id: 'st-s4e1-1', name: '[AIO Torrentio] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K' },
-              { id: 'st-s4e1-2', name: '[AIO Direct CDN] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p' }
+              { id: 'st-s4e1-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K' },
+              { id: 'st-s4e1-2', name: '[TV-MAX Direct CDN] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p' }
             ]
           },
           {
@@ -228,7 +228,7 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '77m',
             overview: 'A plane brings Mike to California and a dead body brings Hawkins to a halt. Nancy starts asking questions.',
             servers: [
-              { id: 'st-s4e2-1', name: '[AIO Torrentio] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K' }
+              { id: 'st-s4e2-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K' }
             ]
           }
         ]
@@ -254,8 +254,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain', 'Michael Caine', 'Matt Damon'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-inter-1', name: '[AIO Torrentio] 4K IMAX Remux', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', speed: '50 MB/s', isVerified: true },
-      { id: 'srv-inter-2', name: '[AIO MediaFusion] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', isVerified: true },
+      { id: 'srv-inter-1', name: '[TV-MAX Ultra] 4K IMAX Remux', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', speed: '50 MB/s', isVerified: true },
+      { id: 'srv-inter-2', name: '[TV-MAX Mirror 2] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -276,8 +276,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Tom Cruise', 'Miles Teller', 'Jennifer Connelly', 'Jon Hamm', 'Glen Powell'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-tg-1', name: '[AIO Torrentio] 4K Dolby Atmos', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', isVerified: true },
-      { id: 'srv-tg-2', name: '[AIO Direct CDN] 1080p High Speed', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Direct CDN', isVerified: true },
+      { id: 'srv-tg-1', name: '[TV-MAX Ultra] 4K Dolby Atmos', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-tg-2', name: '[TV-MAX Direct CDN] 1080p High Speed', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Direct', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -298,8 +298,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Keanu Reeves', 'Donnie Yen', 'Bill Skarsgård', 'Laurence Fishburne', 'Hiroyuki Sanada'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-jw-1', name: '[AIO Torrentio] 4K 2160p HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', isVerified: true },
-      { id: 'srv-jw-2', name: '[AIO MediaFusion] 1080p FHD', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', isVerified: true },
+      { id: 'srv-jw-1', name: '[TV-MAX Ultra] 4K 2160p HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-jw-2', name: '[TV-MAX Mirror 2] 1080p FHD', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -321,8 +321,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Kathryn Bernardo', 'Alden Richards', 'Kakai Bautista', 'Maymay Entrata', 'Joross Gamboa'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-hlg-1', name: '[AIO Star Cinema CDN] 1080p FHD', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Star Cinema Vault', isVerified: true },
-      { id: 'srv-hlg-2', name: '[AIO MediaFusion Mirror] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', isVerified: true },
+      { id: 'srv-hlg-1', name: '[TV-MAX Pinoy Cinema] 1080p FHD', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Pinoy Vault', isVerified: true },
+      { id: 'srv-hlg-2', name: '[TV-MAX Mirror 2] 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     quality: '1080p HD'
   },
@@ -343,8 +343,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Bea Alonzo', 'Angel Locsin', 'Toni Gonzaga', 'Shaina Magdayao', 'Enchong Dee'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-fs-1', name: '[AIO Star Cinema CDN] 1080p Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Star Cinema Vault', isVerified: true },
-      { id: 'srv-fs-2', name: '[AIO Nuvio Edge] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Nuvio VIP', isVerified: true },
+      { id: 'srv-fs-1', name: '[TV-MAX Pinoy Cinema] 1080p Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Pinoy Vault', isVerified: true },
+      { id: 'srv-fs-2', name: '[TV-MAX VIP CDN] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX VIP', isVerified: true },
     ],
     quality: '1080p HD'
   },
@@ -366,8 +366,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Natsuki Hanae', 'Akari Kito', 'Hiro Shimono', 'Yoshitsugu Matsuoka', 'Satoshi Hino'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-ds-1', name: '[AIO Torrentio Anime] 4K 60fps Dual Audio', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'Torrentio Anime', isVerified: true },
-      { id: 'srv-ds-2', name: '[AIO Direct CDN] 1080p Japanese Audio', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Direct CDN', isVerified: true },
+      { id: 'srv-ds-1', name: '[TV-MAX Anime] 4K 60fps Dual Audio', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Anime', isVerified: true },
+      { id: 'srv-ds-2', name: '[TV-MAX Direct CDN] 1080p Japanese Audio', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Direct', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -388,8 +388,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Ryunosuke Kamiki', 'Mone Kamishiraishi', 'Ryo Narita', 'Aoi Yuki'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-yn-1', name: '[AIO Torrentio] 1080p BluRay Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Torrentio', isVerified: true },
-      { id: 'srv-yn-2', name: '[AIO Nuvio Edge] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Nuvio VIP', isVerified: true },
+      { id: 'srv-yn-1', name: '[TV-MAX Ultra] 1080p BluRay Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-yn-2', name: '[TV-MAX VIP CDN] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX VIP', isVerified: true },
     ],
     quality: '1080p HD'
   },
@@ -411,8 +411,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Bunny', 'Rinky', 'Gimera', 'Frank'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-bbb-1', name: '[AIO OpenCinema] 4K 60fps Master HLS', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'OpenCinema', isVerified: true },
-      { id: 'srv-bbb-2', name: '[AIO Blender Studio] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Direct CDN', isVerified: true },
+      { id: 'srv-bbb-1', name: '[TV-MAX 4K Master] 4K 60fps Master HLS', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-bbb-2', name: '[TV-MAX 1080p Direct] Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Direct', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -433,8 +433,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Halina Reijn', 'Thom Hoffman'],
     streamUrl: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
     servers: [
-      { id: 'srv-sin-1', name: '[AIO Akamai Edge] 4K HLS Playlist', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K', provider: 'Akamai Edge', isVerified: true },
-      { id: 'srv-sin-2', name: '[AIO VideoJS] Direct Web Video', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'VideoJS', isVerified: true },
+      { id: 'srv-sin-1', name: '[TV-MAX High-Speed CDN] 4K HLS Playlist', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-sin-2', name: '[TV-MAX Direct Stream] Direct Web Video', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -457,8 +457,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Timothée Chalamet', 'Zendaya', 'Rebecca Ferguson', 'Javier Bardem', 'Austin Butler'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-dune-1', name: '[AIO Torrentio] 4K IMAX Remux HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', speed: '58 MB/s', latency: '16ms', isVerified: true },
-      { id: 'srv-dune-2', name: '[AIO MediaFusion] 1080p FHD 60fps', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', speed: '32 MB/s', latency: '22ms', isVerified: true },
+      { id: 'srv-dune-1', name: '[TV-MAX Ultra] 4K IMAX Remux HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', speed: '58 MB/s', latency: '16ms', isVerified: true },
+      { id: 'srv-dune-2', name: '[TV-MAX Mirror 2] 1080p FHD 60fps', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', speed: '32 MB/s', latency: '22ms', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -480,8 +480,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Hiroyuki Sanada', 'Cosmo Jarvis', 'Anna Sawai', 'Tadanobu Asano', 'Takehiro Hira'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-shogun-1', name: '[AIO Torrentio] 4K HDR Dolby Atmos', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', isVerified: true },
-      { id: 'srv-shogun-2', name: '[AIO Nuvio Edge] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Nuvio VIP', isVerified: true },
+      { id: 'srv-shogun-1', name: '[TV-MAX Ultra] 4K HDR Dolby Atmos', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', isVerified: true },
+      { id: 'srv-shogun-2', name: '[TV-MAX VIP CDN] 1080p Direct', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX VIP', isVerified: true },
     ],
     seasons: [
       {
@@ -496,7 +496,7 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '70m',
             overview: 'Destinies converge in Japan after an English ship runs aground in Toranaga\'s territory.',
             servers: [
-              { id: 'shogun-s1e1-1', name: '[AIO Torrentio] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K' },
+              { id: 'shogun-s1e1-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K' },
             ]
           },
           {
@@ -507,7 +507,7 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
             duration: '59m',
             overview: 'Blackthorne\'s arrival in Osaka creates a storm among Christian Daimyos and Toranaga.',
             servers: [
-              { id: 'shogun-s1e2-1', name: '[AIO Torrentio] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K' }
+              { id: 'shogun-s1e2-1', name: '[TV-MAX Ultra] 4K HDR', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'hls', quality: '4K' }
             ]
           }
         ]
@@ -532,8 +532,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Dingdong Dantes', 'Marian Rivera', 'Jordan Lim', 'Pepe Herrera', 'Chamyto Aguedan'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-rewind-1', name: '[AIO Star Cinema CDN] 1080p Master', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Star Cinema Vault', isVerified: true },
-      { id: 'srv-rewind-2', name: '[AIO MediaFusion] 1080p Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'MediaFusion', isVerified: true },
+      { id: 'srv-rewind-1', name: '[TV-MAX Pinoy Cinema] 1080p Master', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Pinoy Vault', isVerified: true },
+      { id: 'srv-rewind-2', name: '[TV-MAX Mirror 2] 1080p Direct MP4', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Core', isVerified: true },
     ],
     quality: '1080p HD'
   },
@@ -554,8 +554,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Shameik Moore', 'Hailee Steinfeld', 'Oscar Isaac', 'Daniel Kaluuya', 'Jake Johnson'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-spider-1', name: '[AIO Torrentio] 4K HDR 60fps', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'Torrentio', speed: '62 MB/s', latency: '14ms', isVerified: true },
-      { id: 'srv-spider-2', name: '[AIO Nuvio Edge] 1080p Master', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Nuvio VIP', isVerified: true },
+      { id: 'srv-spider-1', name: '[TV-MAX Ultra] 4K HDR 60fps', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '4K HDR', provider: 'TV-MAX Core', speed: '62 MB/s', latency: '14ms', isVerified: true },
+      { id: 'srv-spider-2', name: '[TV-MAX VIP CDN] 1080p Master', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX VIP', isVerified: true },
     ],
     quality: '4K HDR'
   },
@@ -576,8 +576,8 @@ export const CINEMA_MOVIES: CinemaMovie[] = [
     cast: ['Rumi Hiiragi', 'Miyu Irino', 'Mari Natsuki', 'Takashi Naito'],
     streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     servers: [
-      { id: 'srv-ghibli-1', name: '[AIO Studio Ghibli Vault] 1080p Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'Studio Ghibli CDN', isVerified: true },
-      { id: 'srv-ghibli-2', name: '[AIO Torrentio Anime] 1080p Dual Audio', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'Torrentio Anime', isVerified: true },
+      { id: 'srv-ghibli-1', name: '[TV-MAX Anime Vault] 1080p Remaster', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'hls', quality: '1080p', provider: 'TV-MAX Anime', isVerified: true },
+      { id: 'srv-ghibli-2', name: '[TV-MAX Anime] 1080p Dual Audio', url: 'https://vjs.zencdn.net/v/oceans.mp4', type: 'mp4', quality: '1080p', provider: 'TV-MAX Anime', isVerified: true },
     ],
     quality: '1080p HD'
   }

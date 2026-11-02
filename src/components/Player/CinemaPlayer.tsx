@@ -87,11 +87,11 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
       : [
           {
             id: 'srv-default',
-            name: 'AIO Default Stream',
+            name: 'TV-MAX Default Stream',
             url: movie.streamUrl,
             type: /vidsrc|multiembed|2embed|embed|autoembed|player|youtube/i.test(movie.streamUrl) ? 'embed' : (movie.streamUrl.includes('.m3u8') ? 'hls' : 'mp4'),
             quality: movie.quality,
-            provider: 'AIOStreams',
+            provider: 'TV-MAX Cloud',
           },
         ];
   }, [movie, activeEpisode]);
@@ -159,7 +159,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
       setCurrentServerIndex(nextIdx);
     } else {
       setHasError(true);
-      setErrorMessage('All AIOStreams mirrors for this title are currently unresponsive. Please try again later.');
+      setErrorMessage('All TV-MAX mirrors for this title are currently unresponsive. Please try again later.');
     }
   }, [availableServers, currentServerIndex]);
 
@@ -499,7 +499,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs z-20 pointer-events-none">
             <div className="w-14 h-14 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin" />
             <p className="mt-4 text-xs font-bold tracking-widest text-cyan-200 uppercase font-mono">
-              Resolving AIOStream Mirror #{currentServerIndex + 1}...
+              Resolving TV-MAX Server Mirror #{currentServerIndex + 1}...
             </p>
           </div>
         )}

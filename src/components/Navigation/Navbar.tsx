@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div 
           onClick={() => onSelectCategory('all')}
           className="flex items-center gap-2.5 cursor-pointer group"
-          title="TV MAX — Nuvio & AIOStreams"
+          title="TV MAX"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
             <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
@@ -87,24 +87,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 TV MAX
               </span>
               <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase tracking-wider">
-                NUVIO
-              </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
-                AIOStreams v2.37
+                PRO
               </span>
               {licensingState?.status === 'ACTIVE' && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenMasterAdmin?.();
-                  }}
-                  className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase flex items-center gap-1 hover:bg-emerald-500/30 transition"
-                  title="TV-MAX Vendo Active • Click to manage"
+                <div
+                  className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase flex items-center gap-1 select-none cursor-default"
+                  title="TV-MAX Vendo Active"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>{licensingState.ticket?.tier === 'trial' ? '24h Trial' : `${licensingState.daysRemaining}d Left`}</span>
-                </button>
+                </div>
               )}
             </div>
             <div className="flex items-center gap-2 mt-1">
@@ -339,14 +331,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </button>
 
-        {/* AIOStreams Provider Config Modal */}
+        {/* Stream Server Settings Modal */}
         <button
           onClick={onOpenAIOStreams}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
-          title="AIOStreams Scrapers & Addon Providers"
+          title="TV-MAX Stream Server Settings"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span className="hidden xs:inline">Addons</span>
+          <span className="hidden xs:inline">Servers</span>
         </button>
 
         {/* Keyboard / Remote Shortcuts */}

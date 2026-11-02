@@ -16,7 +16,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
     { key: '← / →', desc: 'Seek backward / forward (10s)' },
     { key: '↑ / ↓', desc: 'Volume up / down (5%) or Spatial Nav' },
     { key: 'F', desc: 'Toggle Fullscreen Cinema mode' },
-    { key: 'S', desc: 'Cycle AIOStreams Server Mirrors' },
+    { key: 'S', desc: 'Cycle TV-MAX Server Mirrors' },
     { key: 'M', desc: 'Mute / Unmute audio' },
     { key: 'G', desc: 'Toggle Dynamic Ambient Glow' },
     { key: 'Gamepad A / B', desc: 'Select (Enter) / Go Back (Escape)' },

@@ -142,17 +142,17 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold tracking-tight text-white font-sans">
-                  AIOStreams & Nuvio Engine
+                  TV-MAX Stream Engine
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
                   v2.37.0
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                  Nuvio 0.6.5
+                  TV-MAX Core v4.6
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Aggregated multi-provider failover, scraper network & zero-buffering CDN
+                Aggregated multi-provider failover & zero-buffering CDN
               </p>
             </div>
           </div>
@@ -220,7 +220,7 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
-                  placeholder="Filter addons and scrapers..."
+                  placeholder="Filter stream servers and mirrors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
@@ -259,7 +259,7 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
                               {addon.latencyMs}ms
                             </span>
                             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">
-                              {addon.type}
+                              {addon.type === 'scraper' ? 'stream mirror' : addon.type}
                             </span>
                           </div>
                         </div>
@@ -311,10 +311,10 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
               <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/30 space-y-2">
                 <div className="flex items-center gap-2 text-cyan-400 text-sm font-bold">
                   <ShieldCheck className="w-4 h-4" />
-                  Universal Stremio & AIOStreams Manifest Support
+                  TV-MAX Stream Manifest Support
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Enter any public or private AIOStreams, Torrentio, or Stremio addon manifest URL. TV MAX will dynamically aggregate its streams with zero APK or native install required.
+                  Enter any stream provider manifest URL. TV MAX will dynamically aggregate its streams with zero APK or native install required.
                 </p>
               </div>
 
@@ -421,7 +421,7 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
                 className="flex items-center gap-2 text-xs text-slate-400 hover:text-red-400 transition-colors pt-2"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                Reset AIOStreams Providers to Factory Defaults
+                Reset TV-MAX Stream Servers to Factory Defaults
               </button>
             </div>
           )}
@@ -431,7 +431,7 @@ export const AIOStreamsModal: React.FC<AIOStreamsModalProps> = ({
         <div className="flex items-center justify-between p-4 border-t border-white/10 bg-black/60 text-xs text-slate-400">
           <span className="flex items-center gap-1.5 font-mono text-[11px]">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            AIOStreams Aggregator Ready • Zero APK Required
+            TV-MAX Aggregator Ready • Zero APK Required
           </span>
 
           <button

@@ -46,10 +46,10 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
     return getStoredWatchlist().includes(movie.id);
   });
 
-  // Realtime Live Stream Resolution via AIOStreams Engine
+  // Realtime Live Stream Resolution via TV-MAX Engine
   const [activeServers, setActiveServers] = useState<StreamServer[]>(() => movie.servers || []);
   const [isResolvingStreams, setIsResolvingStreams] = useState<boolean>(true);
-  const [streamStatus, setStreamStatus] = useState<string>('Querying AIOStreams scrapers...');
+  const [streamStatus, setStreamStatus] = useState<string>('Connecting to TV-MAX high-speed servers...');
 
   // 1. Hydrate full metadata from Nuvio Cinemeta API (for full synopsis, cast, and all seasons/episodes)
   useEffect(() => {
@@ -93,7 +93,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
         if (!isSubscribed) return;
         if (result.servers && result.servers.length > 0) {
           setActiveServers(result.servers);
-          setStreamStatus(result.isRealtime ? `Live AIOStreams (${result.latencyMs}ms)` : 'Edge CDN Verified');
+          setStreamStatus(result.isRealtime ? `TV-MAX Ultra (${result.latencyMs}ms)` : 'TV-MAX Edge Verified');
         }
       } catch (err) {
         console.warn('Stream resolution error:', err);
@@ -192,7 +192,7 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
               </span>
               {isLoadingDetails && (
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
-                  Syncing Nuvio Metadata...
+                  Syncing TV-MAX Metadata...
                 </span>
               )}
             </div>
@@ -265,12 +265,12 @@ export const MovieDetailModal: React.FC<MovieDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Multi-Server AIOStreams Failover Providers */}
+          {/* Multi-Server TV-MAX Failover Providers */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-white">
                 <Layers className="w-4 h-4 text-cyan-400" />
-                AIOStreams Multi-Provider Mirrors ({activeServers.length} Streams Available)
+                TV-MAX Multi-Server Mirrors ({activeServers.length} Streams Available)
               </div>
               <span className="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />

@@ -53,105 +53,105 @@ export function buildRealMovieStreams(
 
   return [
     {
-      id: `aio-vidsrc-${id}-${season}-${episode}`,
-      name: '[AIO Nuvio Ultra 1] 1080p FHD (VidSrc)',
+      id: `tvmax-srv-1-${id}-${season}-${episode}`,
+      name: '[TV-MAX Ultra 1] 1080p FHD Cinema',
       url: isSeries 
         ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
         : `https://vidsrc.to/embed/movie/${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'VidSrc Ultra',
+      provider: 'TV-MAX Core',
       speed: '85 MB/s',
       latency: '12ms',
       isVerified: true
     },
     {
-      id: `aio-multiembed-${id}-${season}-${episode}`,
-      name: '[AIO MultiEmbed 2] Multi-Audio & Subs',
+      id: `tvmax-srv-2-${id}-${season}-${episode}`,
+      name: '[TV-MAX Mirror 2] Multi-Audio & Subs',
       url: isSeries
         ? `https://multiembed.mov/?video_id=${id}&s=${season}&e=${episode}`
         : `https://multiembed.mov/?video_id=${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'MultiEmbed CDN',
+      provider: 'TV-MAX Cloud',
       speed: '70 MB/s',
       latency: '15ms',
       isVerified: true
     },
     {
-      id: `aio-vidsrcme-${id}-${season}-${episode}`,
-      name: '[AIO Prime Stream 3] 4K HDR Ready (VidSrc ME)',
+      id: `tvmax-srv-3-${id}-${season}-${episode}`,
+      name: '[TV-MAX Ultra 3] 4K HDR Ready',
       url: isSeries
         ? `https://vidsrc.me/embed/tv?imdb=${id}&season=${season}&episode=${episode}`
         : `https://vidsrc.me/embed/movie?imdb=${id}`,
       type: 'embed',
       quality: '4K HDR',
-      provider: 'VidSrc ME',
+      provider: 'TV-MAX VIP',
       speed: '65 MB/s',
       latency: '18ms',
       isVerified: true
     },
     {
-      id: `aio-2embed-${id}-${season}-${episode}`,
-      name: '[AIO 2Embed Mirror 4] Global High-Speed',
+      id: `tvmax-srv-4-${id}-${season}-${episode}`,
+      name: '[TV-MAX Mirror 4] Global High-Speed',
       url: isSeries
         ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
         : `https://www.2embed.cc/embed/${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: '2Embed Prime',
+      provider: 'TV-MAX Core',
       speed: '55 MB/s',
       latency: '22ms',
       isVerified: true
     },
     {
-      id: `aio-autoembed-${id}-${season}-${episode}`,
-      name: '[AIO AutoEmbed 5] Fast CDN Streaming',
+      id: `tvmax-srv-5-${id}-${season}-${episode}`,
+      name: '[TV-MAX Direct 5] Fast CDN Streaming',
       url: isSeries
         ? `https://autoembed.co/tv/imdb/${id}-${season}-${episode}`
         : `https://autoembed.co/movie/imdb/${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'AutoEmbed CDN',
+      provider: 'TV-MAX Direct',
       speed: '75 MB/s',
       latency: '14ms',
       isVerified: true
     },
     {
-      id: `aio-vidlink-${id}-${season}-${episode}`,
-      name: '[AIO VidLink 6] Multi-Subtitles Pro Player',
+      id: `tvmax-srv-6-${id}-${season}-${episode}`,
+      name: '[TV-MAX Stream 6] Multi-Subtitles Pro Player',
       url: isSeries
         ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
         : `https://vidlink.pro/movie/${id}`,
       type: 'embed',
       quality: '1080p FHD',
-      provider: 'VidLink Pro',
+      provider: 'TV-MAX Pro',
       speed: '80 MB/s',
       latency: '16ms',
       isVerified: true
     },
     {
-      id: `aio-smashy-${id}-${season}-${episode}`,
-      name: '[AIO Smashy 7] Ultra Fallback Stream',
+      id: `tvmax-srv-7-${id}-${season}-${episode}`,
+      name: '[TV-MAX Mirror 7] Ultra Fallback Stream',
       url: isSeries
         ? `https://player.smashystream.com/tv/${id}?s=${season}&e=${episode}`
         : `https://player.smashystream.com/movie/${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'SmashyStream',
+      provider: 'TV-MAX Core',
       speed: '60 MB/s',
       latency: '20ms',
       isVerified: true
     },
     {
-      id: `aio-superembed-${id}-${season}-${episode}`,
-      name: '[AIO SuperEmbed 8] Direct Global CDN',
+      id: `tvmax-srv-8-${id}-${season}-${episode}`,
+      name: '[TV-MAX Stream 8] Direct Global CDN',
       url: isSeries
         ? `https://multiembed.mov/directstream.php?video_id=${id}&s=${season}&e=${episode}`
         : `https://multiembed.mov/directstream.php?video_id=${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'SuperEmbed Global',
+      provider: 'TV-MAX Cloud',
       speed: '70 MB/s',
       latency: '15ms',
       isVerified: true

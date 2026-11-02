@@ -16,9 +16,9 @@ export interface AIOStreamAddon {
 export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   {
     id: 'addon-cinemeta',
-    name: 'Cinemeta Catalog Hub',
+    name: 'TV-MAX Core Catalog',
     version: 'v3.0.12',
-    description: 'Official IMDb & TMDB catalog metadata engine for movies, series, posters, synopses, and cast.',
+    description: 'Official catalog metadata engine for movies, series, posters, synopses, and cast.',
     manifestUrl: 'https://v3-cinemeta.strem.io/manifest.json',
     type: 'catalog',
     icon: 'Film',
@@ -30,9 +30,9 @@ export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   },
   {
     id: 'addon-torrentio',
-    name: 'Torrentio Streams Aggregator',
+    name: 'TV-MAX Ultra Stream Mirror',
     version: 'v1.0.14',
-    description: 'Multi-resolution stream provider aggregating 4K HDR, 1080p 60fps, and 720p high-speed video feeds.',
+    description: 'Multi-resolution stream provider with 4K HDR, 1080p 60fps, and 720p video feeds.',
     manifestUrl: 'https://torrentio.strem.fun/manifest.json',
     type: 'scraper',
     icon: 'Zap',
@@ -44,9 +44,9 @@ export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   },
   {
     id: 'addon-mediafusion',
-    name: 'MediaFusion Multi-Source',
+    name: 'TV-MAX Global Media Mirror',
     version: 'v4.2.0',
-    description: 'Multi-server failover scraper indexing direct CDNs, global sports feeds, and TV broadcasts.',
+    description: 'Multi-server failover node indexing direct CDNs, global sports feeds, and TV broadcasts.',
     manifestUrl: 'https://mediafusion.elfhosted.com/manifest.json',
     type: 'scraper',
     icon: 'Sparkles',
@@ -58,9 +58,9 @@ export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   },
   {
     id: 'addon-comet',
-    name: 'Comet Streams Fast Debrid',
+    name: 'TV-MAX Fast Cloud Mirror',
     version: 'v2.1.0',
-    description: 'High-speed torrent and debrid stream resolver with smart caching and fast indexers.',
+    description: 'High-speed cloud stream resolver with smart caching and fast indexers.',
     manifestUrl: 'https://comet.elfhosted.com/manifest.json',
     type: 'scraper',
     icon: 'Zap',
@@ -72,7 +72,7 @@ export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   },
   {
     id: 'addon-nuvio-vip',
-    name: 'Nuvio 4K VIP CDN Engine',
+    name: 'TV-MAX VIP 4K CDN Engine',
     version: 'v0.6.5',
     description: 'Ultra-low latency edge delivery network with adaptive HLS bitrate switching and zero buffering.',
     manifestUrl: 'https://edge.nuvio.media/manifest.json',
@@ -86,9 +86,9 @@ export const DEFAULT_AIO_ADDONS: AIOStreamAddon[] = [
   },
   {
     id: 'addon-cyberflix',
-    name: 'CyberFlix VOD Catalog',
+    name: 'TV-MAX Premiere Catalog',
     version: 'v1.5.2',
-    description: 'Trending and curated feeds from top worldwide streaming platforms with IMDb ratings.',
+    description: 'Trending and curated feeds from top worldwide streaming platforms.',
     manifestUrl: 'https://cyberflix.strem.fun/manifest.json',
     type: 'catalog',
     icon: 'Flame',

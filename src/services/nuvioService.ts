@@ -75,7 +75,7 @@ export function formatCinemetaMovie(item: CinemetaMetaItem, defaultCategory: Cin
   }
 
   const castArray = Array.isArray(item.cast) ? item.cast : [];
-  const directorString = Array.isArray(item.director) ? item.director.join(', ') : item.director || 'Cinemeta Director';
+  const directorString = Array.isArray(item.director) ? item.director.join(', ') : item.director || 'TV-MAX Director';
   const genresArray = Array.isArray(item.genres) && item.genres.length > 0 ? item.genres : ['Action', 'Drama'];
   const genresLower = genresArray.map(g => g.toLowerCase());
 

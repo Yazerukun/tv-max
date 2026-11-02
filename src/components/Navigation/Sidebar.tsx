@@ -56,7 +56,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'cinema',
     label: 'Movies',
-    tagline: 'Cinemeta 4K VOD',
+    tagline: 'TV-MAX 4K VOD',
     icon: Film,
     activeGradient: 'from-cyan-400 to-sky-500',
     glowColor: 'shadow-cyan-500/25',
@@ -154,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onSelectCategory('all');
           }}
           className="flex items-center gap-3 cursor-pointer group min-w-0"
-          title="TV MAX — Nuvio & AIOStreams"
+          title="TV MAX"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
             <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
@@ -379,17 +379,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         )}
 
-        {/* AIOStreams Addons */}
+        {/* TV-MAX Stream Servers */}
         <button
           onClick={onOpenAIOStreams}
           data-nav="true"
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition ${
             isCollapsed ? 'justify-center px-0' : ''
           }`}
-          title="AIOStreams Addon Manager"
+          title="TV-MAX Stream Server Manager"
         >
           <SlidersHorizontal className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-          {!isCollapsed && <span>AIO Addons</span>}
+          {!isCollapsed && <span>Stream Servers</span>}
         </button>
 
         {/* Remote & Keyboard Shortcuts */}

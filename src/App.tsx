@@ -16,7 +16,7 @@ import { SpotlightSearchModal } from './components/Modals/SpotlightSearchModal';
 import { VendoActivationModal } from './components/Modals/VendoActivationModal';
 import { VendoExpiredModal } from './components/Modals/VendoExpiredModal';
 import { MasterAdminModal } from './components/Modals/MasterAdminModal';
-import { getLicensingState, syncLicensingHeartbeat, LicensingState } from './services/licensingGuard';
+import { getLicensingState, getInitialLicensingState, syncLicensingHeartbeat, LicensingState } from './services/licensingGuard';
 import { CinemaMovie, Episode } from './data/cinemaMovies';
 import { 
   getStoredPlayerSettings, 
@@ -64,7 +64,7 @@ export const App: React.FC = () => {
   const [isSpotlightOpen, setIsSpotlightOpen] = useState<boolean>(false);
 
   // TV-MAX Enterprise Vendo Licensing State
-  const [licensingState, setLicensingState] = useState<LicensingState | null>(null);
+  const [licensingState, setLicensingState] = useState<LicensingState>(() => getInitialLicensingState());
   const [isMasterAdminOpen, setIsMasterAdminOpen] = useState<boolean>(false);
 
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)

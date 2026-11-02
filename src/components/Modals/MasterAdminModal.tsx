@@ -8,7 +8,10 @@ interface MasterAdminModalProps {
 }
 
 export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onClose }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!sessionStorage.getItem('tvmax_master_token');
+  });
+  const [userInput, setUserInput] = useState('ian');
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -29,14 +32,31 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === 'ian-master-2026' || passwordInput === '123') {
-      setIsAuthenticated(true);
-      setAuthError(null);
-      fetchAccounts();
-    } else {
-      setAuthError('Invalid Master Password.');
+    setIsLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch(`${DEFAULT_AUTHORITY_URL}/api/master/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: userInput.trim(),
+          password: passwordInput.trim()
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('tvmax_master_token', data.token || 'valid');
+        fetchAccounts();
+      } else {
+        setAuthError(data.message || 'Invalid Master Admin Username or Password.');
+      }
+    } catch (err: any) {
+      setAuthError('Failed to reach Master Authority API. Please check server.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -154,23 +174,50 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
 
         {/* Step 1: Password Gate */}
         {!isAuthenticated ? (
-          <form onSubmit={handleLogin} className="max-w-sm mx-auto py-8 space-y-4 text-center">
+          <form onSubmit={handleLogin} className="max-w-sm mx-auto py-6 space-y-4 text-center">
             <Key className="w-12 h-12 text-cyan-400 mx-auto" />
-            <h3 className="text-base font-bold text-white">Enter Master Secret Key</h3>
-            {authError && <p className="text-xs text-rose-400">{authError}</p>}
-            <input
-              type="password"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              placeholder="Master PIN / Key"
-              className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/15 text-center text-sm text-white focus:outline-none focus:border-cyan-400 font-mono"
-              autoFocus
-            />
+            <div>
+              <h3 className="text-base font-bold text-white">Ian's Master Cloud Login</h3>
+              <p className="text-xs text-slate-400 mt-1">Verified securely by Central Authority API</p>
+            </div>
+
+            {authError && (
+              <div className="p-3 bg-rose-500/15 border border-rose-500/30 text-rose-300 rounded-xl text-xs">
+                {authError}
+              </div>
+            )}
+
+            <div className="space-y-3 text-left">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-400 font-bold uppercase">Master Username</label>
+                <input
+                  type="text"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="e.g. ian"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-400 font-bold uppercase">Master Password</label>
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Master Password"
+                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 font-mono"
+                  autoFocus
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="w-full py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm transition"
+              disabled={isLoading}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 text-black font-extrabold text-sm transition shadow-lg shadow-cyan-500/20 disabled:opacity-50"
             >
-              Unlock Master Panel
+              {isLoading ? 'Verifying with Authority...' : 'Unlock Master Controller'}
             </button>
           </form>
         ) : (

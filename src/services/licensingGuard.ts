@@ -170,6 +170,42 @@ function updateMonotonicTime(nowSec: number): { isTampered: boolean } {
 }
 
 /**
+ * Evaluates initial licensing state synchronously on first component mount
+ * Eliminates screen flash before async crypto verification finishes
+ */
+export function getInitialLicensingState(): LicensingState {
+  if (typeof window === 'undefined') {
+    return { status: 'UNACTIVATED', ticket: null, daysRemaining: 0, hoursRemaining: 0 };
+  }
+  const rawTicket = localStorage.getItem(STORAGE_KEYS.TICKET);
+  if (!rawTicket) {
+    return {
+      status: 'UNACTIVATED',
+      ticket: null,
+      daysRemaining: 0,
+      hoursRemaining: 0,
+      message: 'This Vendo Node requires one-time activation to unlock streaming.'
+    };
+  }
+  try {
+    const ticket = JSON.parse(rawTicket);
+    const now = Math.floor(Date.now() / 1000);
+    if (now > ticket.expiresAt) {
+      return { status: 'EXPIRED', ticket, daysRemaining: 0, hoursRemaining: 0 };
+    }
+    const remainingSeconds = ticket.expiresAt - now;
+    return {
+      status: 'ACTIVE',
+      ticket,
+      daysRemaining: Math.floor(remainingSeconds / 86400),
+      hoursRemaining: Math.floor((remainingSeconds % 86400) / 3600)
+    };
+  } catch (e) {
+    return { status: 'UNACTIVATED', ticket: null, daysRemaining: 0, hoursRemaining: 0 };
+  }
+}
+
+/**
  * Evaluates the current licensing state of the TV-MAX client node
  */
 export async function getLicensingState(): Promise<LicensingState> {

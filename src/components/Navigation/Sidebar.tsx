@@ -146,15 +146,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
+      {/* 0. Floating Rail Toggle Handle */}
+      <button
+        type="button"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-[#0a0e22] hover:bg-cyan-500 border border-cyan-500/50 hover:border-cyan-300 text-cyan-300 hover:text-black shadow-lg shadow-cyan-500/25 flex items-center justify-center transition-all hover:scale-110 active:scale-90 z-50 cursor-pointer"
+        title={isCollapsed ? 'Expand Sidebar Menu' : 'Collapse Sidebar Menu'}
+        aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+      >
+        {isCollapsed ? <ChevronRight className="w-4 h-4 stroke-[2.5]" /> : <ChevronLeft className="w-4 h-4 stroke-[2.5]" />}
+      </button>
+
       {/* 1. Header / Brand */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-white/10 overflow-hidden">
+      <div className={`h-16 flex items-center border-b border-white/10 ${
+        isCollapsed ? 'justify-center px-2' : 'justify-between px-4'
+      }`}>
         <div 
           onClick={() => {
-            onSelectNavMode('cinema');
-            onSelectCategory('all');
+            if (isCollapsed) {
+              setIsCollapsed(false);
+            } else {
+              onSelectNavMode('cinema');
+              onSelectCategory('all');
+            }
           }}
-          className="flex items-center gap-3 cursor-pointer group min-w-0"
-          title="TV MAX"
+          className={`flex items-center gap-3 cursor-pointer group min-w-0 ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+          title={isCollapsed ? 'Click to Expand Sidebar' : 'TV MAX'}
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
             <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
@@ -179,15 +198,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Collapse / Expand Toggle Button */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition"
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          data-nav="true"
-        >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {/* Header Collapse Toggle Button (When Expanded) */}
+        {!isCollapsed && (
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(true)}
+            className="w-8 h-8 rounded-xl bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+            title="Collapse Sidebar"
+          >
+            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        )}
       </div>
 
       {/* 2. Primary 6 Entertainment Hubs Navigation */}
@@ -404,6 +425,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Keyboard className="w-4 h-4 text-slate-400 flex-shrink-0" />
           {!isCollapsed && <span>Shortcuts</span>}
         </button>
+
+        {/* Dedicated High-Visibility Expand / Collapse Action */}
+        <div className="pt-2 border-t border-white/5 mt-2">
+          {isCollapsed ? (
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(false)}
+              className="w-full py-2.5 px-1 rounded-xl bg-gradient-to-r from-cyan-500/20 to-sky-500/20 hover:from-cyan-500/30 hover:to-sky-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-105 active:scale-95 shadow-md shadow-cyan-500/10 cursor-pointer"
+              title="Expand Full Sidebar Menu"
+            >
+              <ChevronRight className="w-5 h-5 text-cyan-400 stroke-[2.5]" />
+              <span className="text-[9px] font-mono font-bold tracking-wider uppercase">Expand</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(true)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-95 cursor-pointer"
+              title="Collapse Sidebar"
+            >
+              <span className="flex items-center gap-2">
+                <ChevronLeft className="w-4 h-4 text-slate-400 stroke-[2.5]" />
+                <span>Collapse Menu</span>
+              </span>
+              <kbd className="px-1.5 py-0.5 rounded bg-black/40 text-[9px] font-mono text-slate-400">
+                Hide
+              </kbd>
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

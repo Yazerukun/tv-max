@@ -461,7 +461,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
                   className="px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-cyan-400/30 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 uiverse-glow-btn"
                 >
                   <Play className="w-4 h-4 fill-black" />
-                  <span>STREAM NOW (AIO PRO)</span>
+                  <span>STREAM NOW (TV-MAX PRO)</span>
                 </button>
 
                 <button

@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="hidden sm:flex items-center gap-2 mt-1">
               <div className="uiverse-eq-container">
                 <span className="uiverse-eq-bar" />
                 <span className="uiverse-eq-bar" />
@@ -114,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mode Switcher: 5 Entertainment Hubs (Movies, Series, Live TV, Anime, Manga/Manhwa Reader) */}
-        <div className="flex items-center p-0.5 sm:p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-1 sm:ml-2 overflow-x-auto scrollbar-none">
+        <div className="hidden lg:flex items-center p-0.5 sm:p-1 bg-white/[0.04] border border-white/10 rounded-2xl ml-1 sm:ml-2 overflow-x-auto scrollbar-none">
           {/* 1. Cinema / Movies */}
           <button
             type="button"
@@ -246,12 +246,24 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* 3. Right: Navigation Actions & Addons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Mobile Quick Spotlight Search */}
+        {onOpenSpotlight && (
+          <button
+            type="button"
+            onClick={onOpenSpotlight}
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 transition-all active:scale-95 shadow-sm"
+            title="Search Movies, Anime, TV Series"
+          >
+            <Search className="w-4 h-4 text-cyan-400" />
+          </button>
+        )}
+
         {/* Continue Watching Pill */}
         {onOpenContinueWatching && (
           <button
             onClick={onOpenContinueWatching}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-slate-300 hover:text-cyan-300 text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-slate-300 hover:text-cyan-300 text-xs font-bold transition-all"
             title="Continue Watching"
           >
             <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
@@ -267,14 +279,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Watchlist Quick Pill */}
         <button
           onClick={() => onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
             selectedCategory === 'watchlist'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/30 scale-105'
               : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
           }`}
           title="View My Watchlist"
         >
-          <Bookmark className="w-3.5 h-3.5" />
+          <Bookmark className="w-3.5 h-3.5 text-amber-400 sm:text-inherit" />
           <span className="hidden sm:inline">Watchlist</span>
           {watchlistCount > 0 && (
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
@@ -301,7 +313,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {onToggleTvMode && (
           <button
             onClick={onToggleTvMode}
-            className={`p-2 rounded-xl border text-xs font-semibold transition ${
+            className={`hidden sm:flex p-2 rounded-xl border text-xs font-semibold transition ${
               isTvMode
                 ? 'bg-purple-600/30 text-purple-300 border-purple-500/50 shadow'
                 : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-400 hover:text-white'
@@ -334,7 +346,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Stream Server Settings Modal */}
         <button
           onClick={onOpenAIOStreams}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm"
           title="TV-MAX Stream Server Settings"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -344,7 +356,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Keyboard / Remote Shortcuts */}
         <button
           onClick={onOpenShortcutsModal}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
+          className="hidden sm:flex p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition"
           title="Smart TV Remote & Keyboard Shortcuts"
         >
           <Keyboard className="w-4 h-4" />

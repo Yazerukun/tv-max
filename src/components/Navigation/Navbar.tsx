@@ -40,6 +40,8 @@ interface NavbarProps {
   onToggleViewMode: () => void;
   navMode: NavMode;
   onSelectNavMode: (mode: NavMode) => void;
+  licensingState?: any;
+  onOpenMasterAdmin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -61,6 +63,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleViewMode,
   navMode,
   onSelectNavMode,
+  licensingState,
+  onOpenMasterAdmin,
 }) => {
   return (
     <header className="h-16 border-b border-white/10 bg-[#04060c]/95 backdrop-blur-2xl px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-6 z-40 select-none sticky top-0">
@@ -88,6 +92,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
                 AIOStreams v2.37
               </span>
+              {licensingState?.status === 'ACTIVE' && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenMasterAdmin?.();
+                  }}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase flex items-center gap-1 hover:bg-emerald-500/30 transition"
+                  title="TV-MAX Vendo Active • Click to manage"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{licensingState.ticket?.tier === 'trial' ? '24h Trial' : `${licensingState.daysRemaining}d Left`}</span>
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-2 mt-1">
               <div className="uiverse-eq-container">

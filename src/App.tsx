@@ -13,6 +13,10 @@ import { AIOStreamsModal } from './components/Modals/AIOStreamsModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
 import { ContinueWatchingModal } from './components/Modals/ContinueWatchingModal';
 import { SpotlightSearchModal } from './components/Modals/SpotlightSearchModal';
+import { VendoActivationModal } from './components/Modals/VendoActivationModal';
+import { VendoExpiredModal } from './components/Modals/VendoExpiredModal';
+import { MasterAdminModal } from './components/Modals/MasterAdminModal';
+import { getLicensingState, syncLicensingHeartbeat, LicensingState } from './services/licensingGuard';
 import { CinemaMovie, Episode } from './data/cinemaMovies';
 import { 
   getStoredPlayerSettings, 
@@ -59,6 +63,10 @@ export const App: React.FC = () => {
   const [isContinueWatchingOpen, setIsContinueWatchingOpen] = useState<boolean>(false);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState<boolean>(false);
 
+  // TV-MAX Enterprise Vendo Licensing State
+  const [licensingState, setLicensingState] = useState<LicensingState | null>(null);
+  const [isMasterAdminOpen, setIsMasterAdminOpen] = useState<boolean>(false);
+
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)
   const [playerSettings, setPlayerSettings] = useState<PlayerSettings>(() => getStoredPlayerSettings());
 
@@ -76,6 +84,43 @@ export const App: React.FC = () => {
     return () => {
       window.removeEventListener('focus', refresh);
       window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  // TV-MAX Vendo Licensing: One-time verification & heartbeat sync
+  useEffect(() => {
+    let isMounted = true;
+    
+    // Initial verification from local cryptographic storage
+    getLicensingState().then((state) => {
+      if (isMounted) setLicensingState(state);
+    });
+
+    // Sync heartbeat with authority
+    syncLicensingHeartbeat().then((state) => {
+      if (isMounted) setLicensingState(state);
+    });
+
+    // Keyboard shortcut to open Ian's Master Cloud Controller (Ctrl+Shift+A)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setIsMasterAdminOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Periodic heartbeat every 15 minutes when connected to internet
+    const interval = setInterval(() => {
+      syncLicensingHeartbeat().then((state) => {
+        if (isMounted) setLicensingState(state);
+      });
+    }, 15 * 60 * 1000);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('keydown', handleKeyDown);
+      clearInterval(interval);
     };
   }, []);
 
@@ -268,6 +313,8 @@ export const App: React.FC = () => {
             onToggleViewMode={handleToggleViewMode}
             navMode={navMode}
             onSelectNavMode={handleSelectNavMode}
+            licensingState={licensingState}
+            onOpenMasterAdmin={() => setIsMasterAdminOpen(true)}
           />
         )}
 
@@ -374,6 +421,28 @@ export const App: React.FC = () => {
       <ShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
+      />
+
+      {/* 9. TV-MAX Vendo One-Time Activation Modal */}
+      <VendoActivationModal
+        isOpen={licensingState?.status === 'UNACTIVATED'}
+        onActivated={() => getLicensingState().then(setLicensingState)}
+      />
+
+      {/* 10. TV-MAX Vendo Subscription Expired Overlay */}
+      <VendoExpiredModal
+        isOpen={licensingState?.status === 'EXPIRED'}
+        operatorName={licensingState?.ticket?.operatorName}
+        onRenewed={() => getLicensingState().then(setLicensingState)}
+      />
+
+      {/* 11. Ian's Master Cloud Controller Modal (Ctrl+Shift+A) */}
+      <MasterAdminModal
+        isOpen={isMasterAdminOpen}
+        onClose={() => {
+          setIsMasterAdminOpen(false);
+          getLicensingState().then(setLicensingState);
+        }}
       />
     </div>
   );

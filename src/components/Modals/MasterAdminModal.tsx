@@ -22,7 +22,13 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
   const [opName, setOpName] = useState('');
   const [tier, setTier] = useState<'trial' | 'pro'>('pro');
   const [newlyCreated, setNewlyCreated] = useState<any | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
+  const [copiedTarget, setCopiedTarget] = useState<string | null>(null);
+
+  const copyText = (text: string, targetKey: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedTarget(targetKey);
+    setTimeout(() => setCopiedTarget(null), 2500);
+  };
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {
@@ -148,8 +154,8 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
                  `2. Enter the Username and PIN above.\n` +
                  `3. Enjoy Unlimited Offline Movies, Anime & Live TV!`;
     navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 3000);
+    setCopiedTarget('full');
+    setTimeout(() => setCopiedTarget(null), 3000);
   };
 
   return (
@@ -272,20 +278,64 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
 
               {/* Newly Created Banner */}
               {newlyCreated && (
-                <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/40 flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div>
-                    <span className="text-emerald-400 font-bold block">✓ Generated Successfully!</span>
-                    <span className="text-white font-bold">{newlyCreated.operator_name}</span> &bull; 
-                    <span className="text-cyan-300 font-mono ml-1">User: {newlyCreated.username}</span> &bull; 
-                    <span className="text-amber-300 font-mono ml-1">PIN: {newlyCreated.password}</span>
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan-950/60 to-indigo-950/60 border border-cyan-400/40 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-emerald-400 font-bold text-xs uppercase tracking-wider">Account Created Successfully!</span>
+                      <span className="text-white font-bold text-sm ml-1">{newlyCreated.operator_name}</span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${newlyCreated.tier === 'trial' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'}`}>
+                      {newlyCreated.tier === 'trial' ? '1-DAY TRIAL' : '30-DAY PRO'}
+                    </span>
                   </div>
-                  <button
-                    onClick={copyDispatchMessage}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-xs transition flex items-center gap-1.5 shadow"
-                  >
-                    {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{isCopied ? 'Copied!' : 'Copy for Messenger/SMS'}</span>
-                  </button>
+
+                  {/* Individual Username & PIN Copy Boxes */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* 1. Username Box */}
+                    <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase font-bold block">Username Only</span>
+                        <span className="text-base font-black text-cyan-300 font-mono select-all truncate block">{newlyCreated.username}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyText(newlyCreated.username, 'new-user')}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition flex items-center gap-1.5 shrink-0"
+                      >
+                        {copiedTarget === 'new-user' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedTarget === 'new-user' ? 'Copied!' : 'Copy User'}</span>
+                      </button>
+                    </div>
+
+                    {/* 2. PIN Box */}
+                    <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase font-bold block">PIN / Password Only</span>
+                        <span className="text-base font-black text-amber-300 font-mono select-all truncate block">{newlyCreated.password}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyText(newlyCreated.password, 'new-pin')}
+                        className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center gap-1.5 shrink-0"
+                      >
+                        {copiedTarget === 'new-pin' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedTarget === 'new-pin' ? 'Copied!' : 'Copy PIN'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3. Full Dispatch Message */}
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={copyDispatchMessage}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-sky-500 hover:from-cyan-300 text-black font-extrabold text-xs transition flex items-center gap-2 shadow-md shadow-cyan-500/20"
+                    >
+                      {copiedTarget === 'full' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      <span>{copiedTarget === 'full' ? 'Full Message Copied!' : '📋 Copy Full Message for Messenger / SMS'}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -304,7 +354,7 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
                   <thead className="bg-black/60 text-slate-400 font-mono border-b border-white/5">
                     <tr>
                       <th className="p-3">Operator</th>
-                      <th className="p-3">Credentials</th>
+                      <th className="p-3">Credentials (Copy Separately)</th>
                       <th className="p-3">Plan</th>
                       <th className="p-3">Status / Time</th>
                       <th className="p-3">Device Lock</th>
@@ -321,8 +371,30 @@ export const MasterAdminModal: React.FC<MasterAdminModalProps> = ({ isOpen, onCl
                             <div className="text-[10px] text-slate-500 font-mono">{acc.id}</div>
                           </td>
                           <td className="p-3 font-mono">
-                            <span className="text-cyan-300 font-bold">{acc.username}</span>
-                            <div className="text-slate-400 text-[10px]">PIN: {acc.password}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-cyan-300 font-bold select-all">{acc.username}</span>
+                              <button
+                                type="button"
+                                onClick={() => copyText(acc.username, `user-${acc.id}`)}
+                                className="px-2 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-[10px] text-cyan-300 border border-cyan-500/30 transition flex items-center gap-1"
+                                title="Copy Username Only"
+                              >
+                                {copiedTarget === `user-${acc.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                <span>{copiedTarget === `user-${acc.id}` ? 'Copied' : 'User'}</span>
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="text-amber-300 font-bold select-all">PIN: {acc.password}</span>
+                              <button
+                                type="button"
+                                onClick={() => copyText(acc.password, `pin-${acc.id}`)}
+                                className="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-[10px] text-amber-300 border border-amber-500/30 transition flex items-center gap-1"
+                                title="Copy PIN Only"
+                              >
+                                {copiedTarget === `pin-${acc.id}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                <span>{copiedTarget === `pin-${acc.id}` ? 'Copied' : 'PIN'}</span>
+                              </button>
+                            </div>
                           </td>
                           <td className="p-3">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${isTrial ? 'bg-amber-500/20 text-amber-300' : 'bg-cyan-500/20 text-cyan-300'}`}>

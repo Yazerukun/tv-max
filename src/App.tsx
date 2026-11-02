@@ -65,7 +65,13 @@ export const App: React.FC = () => {
 
   // TV-MAX Enterprise Vendo Licensing State
   const [licensingState, setLicensingState] = useState<LicensingState>(() => getInitialLicensingState());
-  const [isMasterAdminOpen, setIsMasterAdminOpen] = useState<boolean>(false);
+  const isDirectAdmin = typeof window !== 'undefined' && (
+    window.location.pathname.startsWith('/admin') ||
+    window.location.pathname.startsWith('/master') ||
+    window.location.pathname.startsWith('/api/master/login') ||
+    window.location.search.includes('view=admin')
+  );
+  const [isMasterAdminOpen, setIsMasterAdminOpen] = useState<boolean>(() => isDirectAdmin);
 
   // Player Settings (Ambient Glow, Volume, Aspect Ratio, Speed)
   const [playerSettings, setPlayerSettings] = useState<PlayerSettings>(() => getStoredPlayerSettings());
@@ -436,11 +442,14 @@ export const App: React.FC = () => {
         onRenewed={() => getLicensingState().then(setLicensingState)}
       />
 
-      {/* 11. Ian's Master Cloud Controller Modal (Ctrl+Shift+A) */}
+      {/* 11. Ian's Master Cloud Controller Modal (Ctrl+Shift+A or /admin) */}
       <MasterAdminModal
         isOpen={isMasterAdminOpen}
         onClose={() => {
           setIsMasterAdminOpen(false);
+          if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+            window.history.replaceState({}, '', '/');
+          }
           getLicensingState().then(setLicensingState);
         }}
       />

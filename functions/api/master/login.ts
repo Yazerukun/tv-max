@@ -47,6 +47,11 @@ export const onRequestPost: PagesFunction = async (context) => {
   }
 };
 
+export const onRequestGet: PagesFunction = async (context) => {
+  const origin = new URL(context.request.url).origin;
+  return Response.redirect(`${origin}/admin`, 302);
+};
+
 export const onRequestOptions: PagesFunction = async () => {
   return new Response(null, { headers: corsHeaders() });
 };

@@ -31,12 +31,24 @@ export const LIVE_TV_CHANNELS: LiveChannel[] = [
     name: 'GMA Network (Kapuso Stream)',
     category: 'pinoy',
     logo: 'https://yt3.googleusercontent.com/_ZJZCMxEI1PZW3WHr4-lvvq2cua4oKcLAtXET1ecklKeTMRoqBDHTp3hHshe3rozByRxwOb5SA=s900-c-k-c0x00ffffff-no-rj',
-    streamUrl: 'https://www.youtube.com/watch?v=gs0CRn0eRd0',
+    streamUrl: 'https://www.youtube.com/watch?v=6VtLDrd6DxI',
     streamType: 'youtube',
     quality: '1080p HD',
     country: 'PH',
     currentShow: 'Kapuso 24/7 Live Stream & News',
     description: 'Official 24/7 GMA Network flagship live stream: breaking news, Kapuso teleseryes, public affairs, and entertainment programs.'
+  },
+  {
+    id: 'ch-gma-news',
+    name: 'GMA Integrated News 24/7',
+    category: 'pinoy',
+    logo: 'https://yt3.googleusercontent.com/_ZJZCMxEI1PZW3WHr4-lvvq2cua4oKcLAtXET1ecklKeTMRoqBDHTp3hHshe3rozByRxwOb5SA=s900-c-k-c0x00ffffff-no-rj',
+    streamUrl: 'https://www.youtube.com/watch?v=sXLGAhozLd0',
+    streamType: 'youtube',
+    quality: '1080p HD',
+    country: 'PH',
+    currentShow: '24 Oras, Saksi & Breaking News Live',
+    description: 'Official 24/7 GMA Integrated News livestream covering nationwide headlines, Eleksyon, 24 Oras, and Saksi.'
   },
   {
     id: 'ch-tfc-guam',

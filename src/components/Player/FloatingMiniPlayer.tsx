@@ -54,6 +54,7 @@ export const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({
         <iframe
           src={streamUrl}
           title={movie.title}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           className="w-full h-full border-0"
         />

@@ -54,20 +54,33 @@ export function buildRealMovieStreams(
   return [
     {
       id: `tvmax-srv-1-${id}-${season}-${episode}`,
-      name: '[TV-MAX Ultra 1] 1080p FHD Cinema',
+      name: '[TV-MAX Ultra 1] 1080p FHD Ad-Shielded',
       url: isSeries 
-        ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${id}`,
+        ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
+        : `https://vidlink.pro/movie/${id}`,
       type: 'embed',
-      quality: '1080p',
-      provider: 'TV-MAX Core',
+      quality: '1080p FHD',
+      provider: 'TV-MAX Ultra',
       speed: '85 MB/s',
       latency: '12ms',
       isVerified: true
     },
     {
       id: `tvmax-srv-2-${id}-${season}-${episode}`,
-      name: '[TV-MAX Mirror 2] Multi-Audio & Subs',
+      name: '[TV-MAX VIP 2] Multi-Subtitles & Fast CDN',
+      url: isSeries
+        ? `https://embed.su/embed/tv/${id}/${season}/${episode}`
+        : `https://embed.su/embed/movie/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'TV-MAX VIP',
+      speed: '80 MB/s',
+      latency: '14ms',
+      isVerified: true
+    },
+    {
+      id: `tvmax-srv-3-${id}-${season}-${episode}`,
+      name: '[TV-MAX Mirror 3] Multi-Audio & Subs',
       url: isSeries
         ? `https://multiembed.mov/?video_id=${id}&s=${season}&e=${episode}`
         : `https://multiembed.mov/?video_id=${id}`,
@@ -79,34 +92,8 @@ export function buildRealMovieStreams(
       isVerified: true
     },
     {
-      id: `tvmax-srv-3-${id}-${season}-${episode}`,
-      name: '[TV-MAX Ultra 3] 4K HDR Ready',
-      url: isSeries
-        ? `https://vidsrc.me/embed/tv?imdb=${id}&season=${season}&episode=${episode}`
-        : `https://vidsrc.me/embed/movie?imdb=${id}`,
-      type: 'embed',
-      quality: '4K HDR',
-      provider: 'TV-MAX VIP',
-      speed: '65 MB/s',
-      latency: '18ms',
-      isVerified: true
-    },
-    {
       id: `tvmax-srv-4-${id}-${season}-${episode}`,
-      name: '[TV-MAX Mirror 4] Global High-Speed',
-      url: isSeries
-        ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
-        : `https://www.2embed.cc/embed/${id}`,
-      type: 'embed',
-      quality: '1080p',
-      provider: 'TV-MAX Core',
-      speed: '55 MB/s',
-      latency: '22ms',
-      isVerified: true
-    },
-    {
-      id: `tvmax-srv-5-${id}-${season}-${episode}`,
-      name: '[TV-MAX Direct 5] Fast CDN Streaming',
+      name: '[TV-MAX Direct 4] Fast CDN Streaming',
       url: isSeries
         ? `https://autoembed.co/tv/imdb/${id}-${season}-${episode}`
         : `https://autoembed.co/movie/imdb/${id}`,
@@ -118,34 +105,21 @@ export function buildRealMovieStreams(
       isVerified: true
     },
     {
-      id: `tvmax-srv-6-${id}-${season}-${episode}`,
-      name: '[TV-MAX Stream 6] Multi-Subtitles Pro Player',
+      id: `tvmax-srv-5-${id}-${season}-${episode}`,
+      name: '[TV-MAX Core 5] High-Speed Global',
       url: isSeries
-        ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
-        : `https://vidlink.pro/movie/${id}`,
-      type: 'embed',
-      quality: '1080p FHD',
-      provider: 'TV-MAX Pro',
-      speed: '80 MB/s',
-      latency: '16ms',
-      isVerified: true
-    },
-    {
-      id: `tvmax-srv-7-${id}-${season}-${episode}`,
-      name: '[TV-MAX Mirror 7] Ultra Fallback Stream',
-      url: isSeries
-        ? `https://player.smashystream.com/tv/${id}?s=${season}&e=${episode}`
-        : `https://player.smashystream.com/movie/${id}`,
+        ? `https://vidsrc.me/embed/tv?imdb=${id}&season=${season}&episode=${episode}`
+        : `https://vidsrc.me/embed/movie?imdb=${id}`,
       type: 'embed',
       quality: '1080p',
       provider: 'TV-MAX Core',
-      speed: '60 MB/s',
-      latency: '20ms',
+      speed: '65 MB/s',
+      latency: '18ms',
       isVerified: true
     },
     {
-      id: `tvmax-srv-8-${id}-${season}-${episode}`,
-      name: '[TV-MAX Stream 8] Direct Global CDN',
+      id: `tvmax-srv-6-${id}-${season}-${episode}`,
+      name: '[TV-MAX Fallback 6] Direct Global CDN',
       url: isSeries
         ? `https://multiembed.mov/directstream.php?video_id=${id}&s=${season}&e=${episode}`
         : `https://multiembed.mov/directstream.php?video_id=${id}`,
@@ -154,6 +128,32 @@ export function buildRealMovieStreams(
       provider: 'TV-MAX Cloud',
       speed: '70 MB/s',
       latency: '15ms',
+      isVerified: true
+    },
+    {
+      id: `tvmax-srv-7-${id}-${season}-${episode}`,
+      name: '[TV-MAX Legacy 7] Emergency Mirror',
+      url: isSeries 
+        ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
+        : `https://vidsrc.to/embed/movie/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'TV-MAX Core',
+      speed: '55 MB/s',
+      latency: '20ms',
+      isVerified: true
+    },
+    {
+      id: `tvmax-srv-8-${id}-${season}-${episode}`,
+      name: '[TV-MAX Legacy 8] 2Embed Stream',
+      url: isSeries
+        ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
+        : `https://www.2embed.cc/embed/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'TV-MAX Core',
+      speed: '50 MB/s',
+      latency: '25ms',
       isVerified: true
     }
   ];

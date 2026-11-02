@@ -511,7 +511,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
       )}
 
       {/* 3. CATEGORY PILLS & REALTIME SEARCH BAR */}
-      <div className="px-4 sm:px-8 py-3 space-y-3 sticky top-16 z-30 bg-[#04060c]/90 backdrop-blur-xl border-y border-white/5">
+      <div className="px-4 sm:px-8 py-3 space-y-3 sticky top-14 md:top-0 z-30 bg-[#04060c]/90 backdrop-blur-xl border-y border-white/5">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Scrollable Category Selector Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">

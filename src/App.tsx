@@ -269,7 +269,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#04060c] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-cyan-500 selection:text-black">
-      {/* 1. Left Sidebar Navigation (Desktop / Tablet) featuring all 6 Entertainment Hubs */}
+      {/* 1. Left Sidebar Navigation (Desktop / Tablet) featuring all 6 Entertainment Hubs & Tools */}
       {!activeMovie && (
         <Sidebar
           navMode={navMode}
@@ -289,6 +289,9 @@ export const App: React.FC = () => {
           onToggleTvMode={toggleTvMode}
           isInstallable={isInstallable}
           onInstallApp={installApp}
+          viewMode={viewMode}
+          onToggleViewMode={handleToggleViewMode}
+          licensingState={licensingState}
         />
       )}
 

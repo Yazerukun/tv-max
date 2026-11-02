@@ -11,16 +11,15 @@ import {
   Keyboard, 
   ChevronLeft, 
   ChevronRight,
-  Layers,
-  Zap,
-  Flame,
-  Radio,
   Search,
   RotateCcw,
   Monitor,
-  Download
+  Download,
+  LayoutGrid,
+  Rows
 } from 'lucide-react';
 import { NavMode } from '../../utils/storage';
+import { LicensingState } from '../../services/licensingGuard';
 
 interface SidebarProps {
   navMode: NavMode;
@@ -37,6 +36,9 @@ interface SidebarProps {
   onToggleTvMode?: () => void;
   isInstallable?: boolean;
   onInstallApp?: () => void;
+  viewMode?: 'rails' | 'grid';
+  onToggleViewMode?: () => void;
+  licensingState?: LicensingState;
 }
 
 interface NavItem {
@@ -137,6 +139,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggleTvMode,
   isInstallable = false,
   onInstallApp,
+  viewMode = 'rails',
+  onToggleViewMode,
+  licensingState,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
@@ -146,43 +151,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* 0. Floating Rail Toggle Handle */}
-      <button
-        type="button"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-[#0a0e22] hover:bg-cyan-500 border border-cyan-500/50 hover:border-cyan-300 text-cyan-300 hover:text-black shadow-lg shadow-cyan-500/25 flex items-center justify-center transition-all hover:scale-110 active:scale-90 z-50 cursor-pointer"
-        title={isCollapsed ? 'Expand Sidebar Menu' : 'Collapse Sidebar Menu'}
-        aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-      >
-        {isCollapsed ? <ChevronRight className="w-4 h-4 stroke-[2.5]" /> : <ChevronLeft className="w-4 h-4 stroke-[2.5]" />}
-      </button>
-
-      {/* 1. Header / Brand */}
-      <div className={`h-16 flex items-center border-b border-white/10 ${
-        isCollapsed ? 'justify-center px-2' : 'justify-between px-4'
-      }`}>
-        <div 
-          onClick={() => {
-            if (isCollapsed) {
-              setIsCollapsed(false);
-            } else {
+      {/* 1. Header / Brand & Single Toggle */}
+      {isCollapsed ? (
+        /* Collapsed Header (Centered Logo + Single Expand Button) */
+        <div className="h-24 flex flex-col items-center justify-center border-b border-white/10 px-2 py-3">
+          <div 
+            onClick={() => {
               onSelectNavMode('cinema');
               onSelectCategory('all');
-            }
-          }}
-          className={`flex items-center gap-3 cursor-pointer group min-w-0 ${
-            isCollapsed ? 'justify-center' : ''
-          }`}
-          title={isCollapsed ? 'Click to Expand Sidebar' : 'TV MAX'}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+            }}
+            className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 cursor-pointer hover:scale-105 transition-transform relative"
+            title="TV MAX"
+          >
             <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
               <Film className="w-5 h-5 text-cyan-400" />
             </div>
+            {licensingState?.status === 'ACTIVE' && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 absolute -top-0.5 -right-0.5 ring-2 ring-[#050711] animate-pulse" />
+            )}
           </div>
 
-          {!isCollapsed && (
-            <div className="text-left min-w-0 animate-fadeIn">
+          {/* Single Expand Button */}
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(false)}
+            className="w-8 h-7 mt-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+            title="Expand Sidebar"
+            aria-label="Expand Sidebar"
+          >
+            <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
+      ) : (
+        /* Expanded Header (Logo + Brand Title + Status + Single Collapse Button) */
+        <div className="h-16 px-4 flex items-center justify-between border-b border-white/10">
+          <div 
+            onClick={() => {
+              onSelectNavMode('cinema');
+              onSelectCategory('all');
+            }}
+            className="flex items-center gap-2.5 cursor-pointer group min-w-0"
+            title="TV MAX"
+          >
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-500 to-indigo-600 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+              <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
+                <Film className="w-4 h-4 text-cyan-400" />
+              </div>
+            </div>
+
+            <div className="text-left min-w-0">
               <div className="flex items-center gap-1.5 leading-none">
                 <span className="font-black text-lg tracking-tighter bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent uppercase drop-shadow-sm font-sans">
                   TV MAX
@@ -190,42 +207,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span className="px-1.5 py-0.2 rounded text-[8px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase tracking-wider">
                   PRO
                 </span>
+                {licensingState?.status === 'ACTIVE' && (
+                  <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+                    {licensingState.ticket?.tier === 'trial' ? '24h Trial' : `${licensingState.daysRemaining}d Left`}
+                  </span>
+                )}
               </div>
-              <p className="text-[10px] text-slate-400 font-mono tracking-wider mt-0.5 truncate">
-                6-IN-1 STREAM HUB
+              <p className="text-[9px] text-slate-400 font-mono tracking-wider mt-0.5 truncate">
+                MULTI-SERVER 4K
               </p>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Header Collapse Toggle Button (When Expanded) */}
-        {!isCollapsed && (
+          {/* Single Collapse Button */}
           <button
             type="button"
             onClick={() => setIsCollapsed(true)}
-            className="w-8 h-8 rounded-xl bg-white/5 hover:bg-cyan-500/20 border border-white/10 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+            className="w-7 h-7 rounded-xl bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-slate-400 hover:text-cyan-300 flex items-center justify-center transition-all active:scale-95 cursor-pointer flex-shrink-0"
             title="Collapse Sidebar"
+            aria-label="Collapse Sidebar"
           >
             <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* 2. Primary 6 Entertainment Hubs Navigation */}
-      <div className="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto scrollbar-none">
+      {/* 2. Scrollable Body: Tools & Entertainment Hubs */}
+      <div className="flex-1 px-3 py-3 space-y-3 overflow-y-auto scrollbar-none">
         {/* Spotlight Search Launcher */}
         <button
           onClick={onOpenSpotlight}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold transition mb-2 shadow-sm ${
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold transition shadow-sm cursor-pointer ${
             isCollapsed ? 'justify-center px-0' : ''
           }`}
           title="Universal Spotlight Search (⌘K / Ctrl+K)"
           data-nav="true"
         >
-          <Search className="w-4 h-4 text-cyan-400 flex-shrink-0 animate-pulse" />
+          <Search className="w-4 h-4 text-cyan-400 flex-shrink-0" />
           {!isCollapsed && (
             <div className="flex-1 flex items-center justify-between text-left text-xs">
-              <span>Spotlight Search</span>
+              <span>Quick Search...</span>
               <kbd className="px-1.5 py-0.5 rounded bg-black/40 text-[9px] font-mono text-cyan-300 border border-cyan-500/30">
                 ⌘K
               </kbd>
@@ -233,225 +254,217 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </button>
 
-        {!isCollapsed && (
-          <div className="px-3 pb-1 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
-            Entertainment Hubs (6)
-          </div>
-        )}
+        {/* Entertainment Hubs Section */}
+        <div className="space-y-1">
+          {!isCollapsed && (
+            <div className="px-3 pb-1 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+              Entertainment Hubs
+            </div>
+          )}
 
-        {NAV_ITEMS.map((item, index) => {
-          const Icon = item.icon;
-          const isActive = navMode === item.id;
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = navMode === item.id;
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelectNavMode(item.id)}
-              data-nav="true"
-              className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-2xl font-bold transition-all duration-200 group relative ${
-                isActive
-                  ? `bg-gradient-to-r ${item.activeGradient} text-white shadow-lg ${item.glowColor} scale-[1.02]`
-                  : 'bg-transparent text-slate-400 hover:text-white hover:bg-white/5'
-              } ${isCollapsed ? 'justify-center px-0' : ''}`}
-              title={`${index + 1}. ${item.label} — ${item.tagline}`}
-            >
-              {/* Icon Container */}
-              <div className={`relative flex items-center justify-center flex-shrink-0 ${
-                isActive ? 'text-white' : item.textColor
-              }`}>
-                <Icon className="w-5 h-5" />
-                {item.isLive && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                  </span>
-                )}
-              </div>
-
-              {/* Labels & Tags (Hidden when collapsed) */}
-              {!isCollapsed && (
-                <div className="flex-1 text-left min-w-0">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className={`text-xs font-black tracking-tight truncate ${
-                      isActive ? 'text-white' : 'text-slate-200'
-                    }`}>
-                      {item.label}
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onSelectNavMode(item.id);
+                  if (item.id === 'cinema') onSelectCategory('all');
+                }}
+                data-nav="true"
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl font-bold transition-all group relative cursor-pointer ${
+                  isActive
+                    ? `bg-gradient-to-r ${item.activeGradient} text-black ${item.glowColor} shadow-lg scale-[1.02]`
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                title={item.tagline}
+              >
+                <div className="relative flex-shrink-0">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-black stroke-[2.5]' : item.textColor}`} />
+                  {item.isLive && (
+                    <span className="flex h-2 w-2 absolute -top-1 -right-1">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                     </span>
+                  )}
+                </div>
+
+                {!isCollapsed && (
+                  <div className="flex-1 flex items-center justify-between text-left min-w-0">
+                    <span className="text-xs truncate">{item.label}</span>
                     {item.badge && (
-                      <span className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-bold uppercase border ${
-                        isActive 
-                          ? 'bg-black/30 text-white border-white/20' 
-                          : item.badgeColor
+                      <span className={`text-[8px] font-mono font-extrabold px-1.5 py-0.5 rounded tracking-wider ${
+                        isActive ? 'bg-black/25 text-black' : item.badgeColor
                       }`}>
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <p className={`text-[10px] truncate ${
-                    isActive ? 'text-white/80' : 'text-slate-500'
-                  }`}>
-                    {item.tagline}
-                  </p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Library & Personal Tools Section */}
+        <div className="space-y-1 pt-2 border-t border-white/5">
+          {!isCollapsed && (
+            <div className="px-3 pb-1 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+              Personal Library
+            </div>
+          )}
+
+          {/* Continue Watching / Resume */}
+          {onOpenContinueWatching && (
+            <button
+              onClick={onOpenContinueWatching}
+              data-nav="true"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                continueWatchingCount > 0
+                  ? 'text-cyan-300 hover:bg-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              } ${isCollapsed ? 'justify-center px-0' : ''}`}
+              title="Continue Watching"
+            >
+              <RotateCcw className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+              {!isCollapsed && (
+                <div className="flex-1 flex items-center justify-between text-left">
+                  <span>Continue Watching</span>
+                  {continueWatchingCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      {continueWatchingCount}
+                    </span>
+                  )}
                 </div>
               )}
-
-              {/* Collapsed Tooltip Indicator Number */}
-              {isCollapsed && (
-                <span className={`absolute top-1 right-2 text-[9px] font-mono font-black ${
-                  isActive ? 'text-white' : 'text-slate-500'
-                }`}>
-                  #{index + 1}
-                </span>
-              )}
             </button>
-          );
-        })}
-      </div>
-
-      {/* 3. Bottom Section: Continue Watching, Watchlist, TV Mode, AIO Addons, Shortcuts */}
-      <div className="p-3 border-t border-white/10 bg-[#04060e] space-y-1 flex-shrink-0">
-        {/* Continue Watching */}
-        <button
-          onClick={onOpenContinueWatching}
-          data-nav="true"
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition ${
-            isCollapsed ? 'justify-center px-0' : ''
-          }`}
-          title="Continue Watching (Resume Playback)"
-        >
-          <RotateCcw className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-          {!isCollapsed && (
-            <div className="flex-1 flex items-center justify-between text-left">
-              <span>Continue Watching</span>
-              {continueWatchingCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black bg-cyan-500/20 text-cyan-300">
-                  {continueWatchingCount}
-                </span>
-              )}
-            </div>
           )}
-        </button>
 
-        {/* Watchlist */}
-        <button
-          onClick={() => {
-            onSelectNavMode('cinema');
-            onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist');
-          }}
-          data-nav="true"
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition ${
-            selectedCategory === 'watchlist' && navMode === 'cinema'
-              ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
-          } ${isCollapsed ? 'justify-center px-0' : ''}`}
-          title="My Watchlist"
-        >
-          <Bookmark className="w-4 h-4 text-amber-400 flex-shrink-0" />
-          {!isCollapsed && (
-            <div className="flex-1 flex items-center justify-between text-left">
-              <span>Watchlist</span>
-              {watchlistCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black bg-amber-500/20 text-amber-300">
-                  {watchlistCount}
-                </span>
-              )}
-            </div>
-          )}
-        </button>
-
-        {/* Smart TV / 10-Foot Spatial Nav Mode */}
-        {onToggleTvMode && (
+          {/* Watchlist */}
           <button
-            onClick={onToggleTvMode}
+            onClick={() => onSelectCategory(selectedCategory === 'watchlist' ? 'all' : 'watchlist')}
             data-nav="true"
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition ${
-              isTvMode
-                ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              selectedCategory === 'watchlist'
+                ? 'bg-amber-500 text-black shadow-md shadow-amber-500/30'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             } ${isCollapsed ? 'justify-center px-0' : ''}`}
-            title="Toggle Smart TV 10-Foot Remote Navigation (Key: T)"
+            title="My Watchlist"
           >
-            <Monitor className={`w-4 h-4 flex-shrink-0 ${isTvMode ? 'text-purple-400' : 'text-slate-400'}`} />
+            <Bookmark className={`w-4 h-4 flex-shrink-0 ${selectedCategory === 'watchlist' ? 'text-black' : 'text-amber-400'}`} />
             {!isCollapsed && (
               <div className="flex-1 flex items-center justify-between text-left">
-                <span>10-Foot TV Mode</span>
-                <span className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-bold ${
-                  isTvMode ? 'bg-purple-500 text-black' : 'bg-white/10 text-slate-400'
-                }`}>
-                  {isTvMode ? 'ACTIVE' : 'OFF'}
-                </span>
+                <span>Watchlist</span>
+                {watchlistCount > 0 && (
+                  <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-black ${
+                    selectedCategory === 'watchlist' ? 'bg-black text-amber-300' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  }`}>
+                    {watchlistCount}
+                  </span>
+                )}
               </div>
             )}
           </button>
-        )}
+        </div>
 
-        {/* Install PWA App */}
-        {isInstallable && onInstallApp && (
+        {/* Display, Settings & System Tools */}
+        <div className="space-y-1 pt-2 border-t border-white/5">
+          {!isCollapsed && (
+            <div className="px-3 pb-1 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+              Display & Controls
+            </div>
+          )}
+
+          {/* View Mode Switcher (Rails vs Grid) */}
+          {onToggleViewMode && (
+            <button
+              onClick={onToggleViewMode}
+              data-nav="true"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer ${
+                isCollapsed ? 'justify-center px-0' : ''
+              }`}
+              title={`Switch View: Currently ${viewMode === 'rails' ? 'Rails' : 'Grid'}`}
+            >
+              {viewMode === 'rails' ? (
+                <>
+                  <LayoutGrid className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                  {!isCollapsed && <span>Switch to Grid View</span>}
+                </>
+              ) : (
+                <>
+                  <Rows className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                  {!isCollapsed && <span>Switch to Rails View</span>}
+                </>
+              )}
+            </button>
+          )}
+
+          {/* TV-MAX Stream Servers Settings */}
           <button
-            onClick={onInstallApp}
+            onClick={onOpenAIOStreams}
             data-nav="true"
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 transition ${
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition cursor-pointer ${
               isCollapsed ? 'justify-center px-0' : ''
             }`}
-            title="Install TV-MAX Desktop / Mobile App"
+            title="TV-MAX Stream Server Mirrors"
           >
-            <Download className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-bounce" />
-            {!isCollapsed && <span>Install TV-MAX</span>}
+            <SlidersHorizontal className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+            {!isCollapsed && <span>Stream Servers</span>}
           </button>
-        )}
 
-        {/* TV-MAX Stream Servers */}
-        <button
-          onClick={onOpenAIOStreams}
-          data-nav="true"
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition ${
-            isCollapsed ? 'justify-center px-0' : ''
-          }`}
-          title="TV-MAX Stream Server Manager"
-        >
-          <SlidersHorizontal className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-          {!isCollapsed && <span>Stream Servers</span>}
-        </button>
-
-        {/* Remote & Keyboard Shortcuts */}
-        <button
-          onClick={onOpenShortcutsModal}
-          data-nav="true"
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition ${
-            isCollapsed ? 'justify-center px-0' : ''
-          }`}
-          title="TV Remote & Keyboard Shortcuts"
-        >
-          <Keyboard className="w-4 h-4 text-slate-400 flex-shrink-0" />
-          {!isCollapsed && <span>Shortcuts</span>}
-        </button>
-
-        {/* Dedicated High-Visibility Expand / Collapse Action */}
-        <div className="pt-2 border-t border-white/5 mt-2">
-          {isCollapsed ? (
+          {/* 10-Foot Smart TV Spatial Nav Mode */}
+          {onToggleTvMode && (
             <button
-              type="button"
-              onClick={() => setIsCollapsed(false)}
-              className="w-full py-2.5 px-1 rounded-xl bg-gradient-to-r from-cyan-500/20 to-sky-500/20 hover:from-cyan-500/30 hover:to-sky-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-105 active:scale-95 shadow-md shadow-cyan-500/10 cursor-pointer"
-              title="Expand Full Sidebar Menu"
+              onClick={onToggleTvMode}
+              data-nav="true"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                isTvMode
+                  ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              } ${isCollapsed ? 'justify-center px-0' : ''}`}
+              title="Toggle Smart TV Remote Navigation (Key: T)"
             >
-              <ChevronRight className="w-5 h-5 text-cyan-400 stroke-[2.5]" />
-              <span className="text-[9px] font-mono font-bold tracking-wider uppercase">Expand</span>
+              <Monitor className={`w-4 h-4 flex-shrink-0 ${isTvMode ? 'text-purple-400' : 'text-slate-400'}`} />
+              {!isCollapsed && (
+                <div className="flex-1 flex items-center justify-between text-left">
+                  <span>10-Foot TV Mode</span>
+                  <span className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-bold ${
+                    isTvMode ? 'bg-purple-500 text-black' : 'bg-white/10 text-slate-400'
+                  }`}>
+                    {isTvMode ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+              )}
             </button>
-          ) : (
+          )}
+
+          {/* Remote & Keyboard Shortcuts */}
+          <button
+            onClick={onOpenShortcutsModal}
+            data-nav="true"
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer ${
+              isCollapsed ? 'justify-center px-0' : ''
+            }`}
+            title="TV Remote & Keyboard Shortcuts"
+          >
+            <Keyboard className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            {!isCollapsed && <span>Shortcuts (Keys)</span>}
+          </button>
+
+          {/* Install PWA App */}
+          {isInstallable && onInstallApp && (
             <button
-              type="button"
-              onClick={() => setIsCollapsed(true)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-95 cursor-pointer"
-              title="Collapse Sidebar"
+              onClick={onInstallApp}
+              data-nav="true"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 transition cursor-pointer ${
+                isCollapsed ? 'justify-center px-0' : ''
+              }`}
+              title="Install TV-MAX Desktop / Mobile App"
             >
-              <span className="flex items-center gap-2">
-                <ChevronLeft className="w-4 h-4 text-slate-400 stroke-[2.5]" />
-                <span>Collapse Menu</span>
-              </span>
-              <kbd className="px-1.5 py-0.5 rounded bg-black/40 text-[9px] font-mono text-slate-400">
-                Hide
-              </kbd>
+              <Download className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-bounce" />
+              {!isCollapsed && <span>Install App</span>}
             </button>
           )}
         </div>
@@ -459,4 +472,3 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
-

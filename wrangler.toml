@@ -1,0 +1,7 @@
+name = "tv-max"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./dist"
+
+[[kv_namespaces]]
+binding = "TVMAX_ACCOUNTS"
+id = "6b681960497544078fcdb058376f23ee"

@@ -5,7 +5,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     const data: any = await context.request.json();
     const accountId = data.account_id;
 
-    const accounts = getAccounts();
+    const accounts = await getAccounts(context.env);
     const initialLen = accounts.length;
     const filtered = accounts.filter(a => a.id !== accountId);
 
@@ -16,7 +16,7 @@ export const onRequestPost: PagesFunction = async (context) => {
       });
     }
 
-    saveAccounts(filtered);
+    await saveAccounts(filtered, context.env);
 
     return new Response(JSON.stringify({
       success: true,

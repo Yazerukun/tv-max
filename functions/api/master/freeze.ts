@@ -5,7 +5,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     const data: any = await context.request.json();
     const accountId = data.account_id;
 
-    const accounts = getAccounts();
+    const accounts = await getAccounts(context.env);
     const acc = accounts.find(a => a.id === accountId);
 
     if (!acc) {
@@ -16,7 +16,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     }
 
     acc.status = 'FROZEN_LOCKED';
-    saveAccounts(accounts);
+    await saveAccounts(accounts, context.env);
 
     return new Response(JSON.stringify({
       success: true,

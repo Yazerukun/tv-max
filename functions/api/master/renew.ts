@@ -6,7 +6,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     const accountId = data.account_id;
     const additionalDays = data.days || 30;
 
-    const accounts = getAccounts();
+    const accounts = await getAccounts(context.env);
     const acc = accounts.find(a => a.id === accountId);
 
     if (!acc) {
@@ -23,7 +23,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     acc.duration_hours = (acc.duration_hours || 0) + (additionalDays * 24);
     acc.status = 'ACTIVE';
 
-    saveAccounts(accounts);
+    await saveAccounts(accounts, context.env);
 
     return new Response(JSON.stringify({
       success: true,

@@ -27,9 +27,9 @@ export const onRequestPost: PagesFunction = async (context) => {
       status: 'UNBOUND_READY'
     };
 
-    const accounts = getAccounts();
+    const accounts = await getAccounts(context.env);
     accounts.unshift(newAcc);
-    saveAccounts(accounts);
+    await saveAccounts(accounts, context.env);
 
     return new Response(JSON.stringify({ success: true, account: newAcc }), {
       status: 200,

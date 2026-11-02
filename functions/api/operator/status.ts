@@ -4,7 +4,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   const url = new URL(context.request.url);
   const accountId = url.searchParams.get('id');
 
-  const accounts = getAccounts();
+  const accounts = await getAccounts(context.env);
   const acc = accounts.find(a => a.id === accountId);
 
   if (!acc) {

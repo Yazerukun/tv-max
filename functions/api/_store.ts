@@ -1,5 +1,5 @@
-// In-Memory Cloud Edge Store for Cloudflare Pages Functions
-// Backed by Cloudflare KV or in-memory persistence with pre-seeded demo accounts
+// In-Memory & Cloud Edge KV Store for Cloudflare Pages Functions
+// Backed by Cloudflare KV with fallback to in-memory persistence
 
 export interface VendoAccount {
   id: string;
@@ -49,12 +49,37 @@ const GLOBAL_STORE: { accounts: VendoAccount[] } = {
   ]
 };
 
-export function getAccounts(): VendoAccount[] {
+const KV_KEY = 'tvmax_vendo_accounts_v1';
+
+export async function getAccounts(env?: any): Promise<VendoAccount[]> {
+  const kv = env?.TVMAX_ACCOUNTS;
+  if (kv) {
+    try {
+      const data = await kv.get(KV_KEY, 'json');
+      if (Array.isArray(data) && data.length > 0) {
+        GLOBAL_STORE.accounts = data;
+        return data;
+      } else {
+        // Seed initial accounts to KV if empty
+        await kv.put(KV_KEY, JSON.stringify(GLOBAL_STORE.accounts));
+      }
+    } catch (e) {
+      console.error('[Store] KV get error:', e);
+    }
+  }
   return GLOBAL_STORE.accounts;
 }
 
-export function saveAccounts(accounts: VendoAccount[]) {
+export async function saveAccounts(accounts: VendoAccount[], env?: any): Promise<void> {
   GLOBAL_STORE.accounts = accounts;
+  const kv = env?.TVMAX_ACCOUNTS;
+  if (kv) {
+    try {
+      await kv.put(KV_KEY, JSON.stringify(accounts));
+    } catch (e) {
+      console.error('[Store] KV save error:', e);
+    }
+  }
 }
 
 export function corsHeaders() {
@@ -62,6 +87,6 @@ export function corsHeaders() {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-master-key'
   };
 }

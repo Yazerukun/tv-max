@@ -19,11 +19,20 @@ import {
   Radio,
   Loader2,
   Skull,
-  Compass
+  Compass,
+  History,
+  Trash2
 } from 'lucide-react';
 import { CINEMA_MOVIES, CinemaMovie, Episode } from '../../data/cinemaMovies';
 import { MovieDetailModal } from './MovieDetailModal';
-import { getStoredWatchlist, toggleStoredWatchlist } from '../../utils/storage';
+import { 
+  getStoredWatchlist, 
+  toggleStoredWatchlist,
+  getStoredContinueWatching,
+  markAsWatched,
+  removeFromContinueWatching,
+  ContinueWatchingItem
+} from '../../utils/storage';
 import { 
   fetchMultiCategoryCatalogs, 
   MultiCategoryCatalogs, 
@@ -47,6 +56,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
   const [activeModalMovie, setActiveModalMovie] = useState<CinemaMovie | null>(null);
   const [viewMode, setViewMode] = useState<'rails' | 'grid'>('rails');
   const [watchlistIds, setWatchlistIds] = useState<string[]>(() => getStoredWatchlist());
+  const [continueWatchingList, setContinueWatchingList] = useState<ContinueWatchingItem[]>(() => getStoredContinueWatching());
 
   // Realtime Live Data State from Nuvio Cinemeta API (Multi-Category Engine)
   const [multiCatalogs, setMultiCatalogs] = useState<MultiCategoryCatalogs | null>(null);
@@ -164,6 +174,35 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
 
   const handleRefreshWatchlist = () => {
     setWatchlistIds(getStoredWatchlist());
+    setContinueWatchingList(getStoredContinueWatching());
+  };
+
+  const handleMarkWatched = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const updated = markAsWatched(id);
+    setContinueWatchingList(updated);
+  };
+
+  const handleRemoveContinue = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const updated = removeFromContinueWatching(id);
+    setContinueWatchingList(updated);
+  };
+
+  const handleResumeItem = (item: ContinueWatchingItem) => {
+    const matched = allCatalogMovies.find(m => m.id === item.movieId);
+    if (matched) {
+      if (item.type === 'series' && item.episodeId && matched.seasons) {
+        let foundEp: Episode | undefined;
+        for (const s of matched.seasons) {
+          foundEp = s.episodes.find(e => e.id === item.episodeId);
+          if (foundEp) break;
+        }
+        onPlayMovie(matched, foundEp);
+      } else {
+        onPlayMovie(matched);
+      }
+    }
   };
 
   // Filtered movies according to category and search query (searching curated + live)
@@ -171,6 +210,9 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
     return allCatalogMovies.filter((m) => {
       if (selectedCategory === 'watchlist') {
         if (!watchlistIds.includes(m.id)) return false;
+      } else if (selectedCategory === 'continue') {
+        const continueIds = continueWatchingList.map(c => c.movieId);
+        if (!continueIds.includes(m.id)) return false;
       } else if (selectedCategory === 'movies') {
         if (m.type === 'series') return false;
       } else if (selectedCategory === 'series') {
@@ -258,6 +300,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
 
   const categories = [
     { id: 'all', label: `All Catalog (${allCatalogMovies.length})`, icon: Film },
+    ...(continueWatchingList.length > 0 ? [{ id: 'continue', label: `Continue Watching (${continueWatchingList.length})`, icon: History }] : []),
     { id: 'watchlist', label: `My Watchlist (${watchlistIds.length})`, icon: Bookmark },
     { id: 'trending', label: 'Trending', icon: Flame },
     { id: 'series', label: 'TV Shows & Series', icon: Tv },
@@ -287,7 +330,7 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-black text-white tracking-wider uppercase">
-                  Nuvio Mobile & AIOStreams v2.37.0
+                  Nuvio Mobile v0.6.7-beta & AIOStreams v2.37.0
                 </span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 uiverse-radar" />
@@ -527,6 +570,118 @@ export const CinemaVODHub: React.FC<CinemaVODHubProps> = ({
       {/* 4. CONTENT DISPLAY: RAILS MODE VS GRID MODE */}
       {viewMode === 'rails' && !searchQuery.trim() && selectedCategory === 'all' ? (
         <div className="space-y-8 px-4 sm:px-8 pt-4">
+          {/* RAIL 0: CONTINUE WATCHING (Nuvio 0.6.7-beta Feature) */}
+          {continueWatchingList.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <History className="w-4 h-4" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                    Continue Watching
+                  </h2>
+                  <span className="text-[11px] font-mono text-cyan-400 px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30">
+                    Nuvio 0.6.7 Sync ({continueWatchingList.length})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollRail('rail-continue', 'left')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                    aria-label="Scroll left"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => scrollRail('rail-continue', 'right')}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition hover:scale-105"
+                    aria-label="Scroll right"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Continue Watching Row */}
+              <div
+                id="rail-continue"
+                className="flex items-center gap-4 overflow-x-auto pb-4 pt-2 scrollbar-none snap-x snap-mandatory"
+              >
+                {continueWatchingList.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleResumeItem(item)}
+                    className="relative flex-shrink-0 w-64 sm:w-72 group cursor-pointer snap-start rounded-2xl overflow-hidden bg-slate-900 border border-white/10 hover:border-cyan-500/60 shadow-lg hover:shadow-cyan-500/20 transition-all duration-300"
+                  >
+                    {/* Backdrop / Thumbnail */}
+                    <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
+                      <img
+                        src={item.backdropUrl || item.posterUrl}
+                        alt={item.movieTitle}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div className="p-3 rounded-full bg-cyan-400 text-black shadow-lg shadow-cyan-500/50 group-hover:scale-110 transition-transform">
+                          <Play className="w-5 h-5 fill-black ml-0.5" />
+                        </div>
+                      </div>
+
+                      {/* Progress bar at bottom of thumbnail */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/20">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all"
+                          style={{ width: `${Math.min(100, Math.max(5, item.percentage))}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Meta info & Action buttons */}
+                    <div className="p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-400 truncate">
+                            {item.movieTitle}
+                          </h3>
+                          <p className="text-[11px] text-slate-400 font-mono truncate">
+                            {item.type === 'series' && item.seasonNumber && item.episodeNumber
+                              ? `S${item.seasonNumber} E${item.episodeNumber}${item.episodeTitle ? ` • ${item.episodeTitle}` : ''}`
+                              : `${Math.round(item.progressSeconds / 60)}m watched`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Nuvio 0.6.7 Mark As Watched & Remove actions */}
+                      <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                        <button
+                          onClick={(e) => handleMarkWatched(e, item.id)}
+                          title="Mark as Watched (Nuvio 0.6.7)"
+                          className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition"
+                        >
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span>Mark Watched</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => handleRemoveContinue(e, item.id)}
+                          title="Remove from Continue Watching"
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* RAIL 1: TOP 10 TRENDING TODAY (With Giant Stylized Numbers) */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">

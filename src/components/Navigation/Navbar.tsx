@@ -58,10 +58,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 TV MAX
               </span>
               <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase tracking-wider">
-                NUVIO
+                NUVIO 0.6.7
               </span>
               <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
-                AIOStreams v2.37
+                AIOStreams v2.37.0
               </span>
             </div>
             <div className="flex items-center gap-2 mt-1">

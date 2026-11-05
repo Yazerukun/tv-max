@@ -1,7 +1,7 @@
-# TV MAX (v4.2.0 — Nuvio Mobile & AIOStreams Web Master Edition)
+# TV MAX (v4.3.0 — Nuvio Mobile 0.6.7-beta & AIOStreams Web Master Edition)
 
 > **Pure Web & PWA Cinema & Streaming Aggregator**  
-> Dedicated exclusively to **[Nuvio Mobile 0.6.5-beta](https://github.com/NuvioMedia/NuvioMobile)** & **[AIOStreams v2.37.0](https://github.com/Viren070/AIOStreams)**.  
+> Dedicated exclusively to **[Nuvio Mobile 0.6.7-beta](https://github.com/NuvioMedia/NuvioMobile/releases/tag/0.6.7-beta)** & **[AIOStreams v2.37.0](https://github.com/Viren070/AIOStreams)**.  
 > Designed with **UI UX PRO MAX v2.15.0** & **[ux-ui-agent-skills v3.0.0](https://github.com/plugin87/ux-ui-agent-skills)** guidelines.  
 > **100% Zero APK Dependency** — Runs directly on Phone, Tablet, PC, Laptop, and Smart TV browsers.
 
@@ -10,8 +10,9 @@
 ## 🌐 Live Production Deployment
 
 - **Production Cloudflare Edge**: [https://tv-max.pages.dev](https://tv-max.pages.dev)
-- **Deployment Preview**: [https://9d008d93.tv-max.pages.dev](https://9d008d93.tv-max.pages.dev)
+- **Secondary Edge Mirror**: [https://aura-stream-vip.pages.dev](https://aura-stream-vip.pages.dev)
 - **Local Dev Server**: `http://localhost:5173`
+- **GitHub Repository**: [https://github.com/Yazerukun/tv-max](https://github.com/Yazerukun/tv-max)
 
 ---
 
@@ -32,10 +33,27 @@ npm run dev
 
 ## 💎 Key Features & Architecture
 
-### 1. Nuvio Mobile Cinema & Series Engine
+### 1. Nuvio Mobile 0.6.7-beta Core Feature Parity
+- 👥 **Watch Party Side Panel with Dynamic Video Resizing**:
+  - Live Watch Party room generation with 1-click room code copying and shareable web link.
+  - Smooth dynamic flex-resizing of the video canvas beside the chat drawer without stopping playback.
+  - Real-time live room messaging and 1-tap animated emoji reaction bursts (🔥, ❤️, 👏, 🍿, 😱, 😂).
+- 🕒 **Continue Watching Rail & "Mark as Watched"**:
+  - Automatically captures playback timestamp and progress percentage every 5 seconds.
+  - Dedicated "Continue Watching" rail on the VOD Hub with progress bar indicators and 1-tap instant resume.
+  - Nuvio 0.6.7 feature: **Mark as Watched** button to clear items or mark completed, plus trash removal.
+- ⏭️ **Chapter Intro & Outro Skipping (MKV / Chapter Parity)**:
+  - Smart floating skip buttons for instant intro skip (+85s) and outro skip (+90s) with active countdown resets.
+- 💬 **Subtitle & Codec Extras Parity**:
+  - Full subtitle customization panel (font size, color, background, offset) and telemetry metadata parity.
+- 🛡️ **Anti-Failover Loop Protection**:
+  - Remembers failed mirror instances during a session to prevent infinite failover loops.
+
+### 2. Nuvio Mobile Cinema & Series Engine
 - **Dynamic Multi-Slide Hero Spotlight**: Auto-rotating feature banner with high-resolution artwork, cinematic bottom gradient, IMDb rating badge, duration, 4K Dolby Vision badges, and 1-tap playback.
 - **Apple TV+ / Netflix-Grade Snap Rails**:
-  - 🏆 **Top 10 Trending Today**: Giant stylized rank numbers (`#1` to `#10`) with glowing cyan borders.
+  - 🕒 **Rail 0: Continue Watching**: Resume in-progress movies and episodes with live progress bars.
+  - 🏆 **Rail 1: Top 10 Trending Today**: Giant stylized rank numbers (`#1` to `#10`) with glowing cyan borders.
   - 🔥 **Nuvio Cinemeta Live Trending Movies**: 100+ Top Blockbusters synced from Stremio Cinemeta.
   - 📺 **Binge-Worthy TV Series & Sagas**: Multi-season and episodic navigation (*House of the Dragon*, *Shōgun*, *Stranger Things*) with per-episode streaming links.
   - ⚔️ **Action, Marvel & Sci-Fi Masters**: *Dune: Part Two*, *Spider-Man: Across the Spider-Verse*, *John Wick 4*, *Avengers*.
@@ -47,12 +65,12 @@ npm run dev
 - **View Mode Switcher**: Seamless 1-click toggle between **Netflix-style Rails Mode** and **Stremio-style Poster Grid Mode**.
 - **Boundless Pagination**: "Load More Movies (+50 Titles)" pagination button for infinite catalog discovery.
 
-### 2. 100% Authentic Theatrical Artwork (Metahub & Amazon IMDb CDN)
+### 3. 100% Authentic Theatrical Artwork (Metahub & Amazon IMDb CDN)
 - Zero generic stock photos or Unsplash placeholders.
 - Official Stremio Metahub CDN (`https://images.metahub.space/poster/medium/{id}/img`) and Amazon IMDb CDN (`._V1_SX600.jpg`).
 - Automatic `/poster/small/` $\to$ `/poster/medium/` high-res upscaling and dynamic image error fallback (`onError`).
 
-### 3. AIOStreams Multi-Server Playback Engine
+### 4. AIOStreams Multi-Server Playback Engine
 - **5 High-Speed Real Stream Mirrors** on every title (`M1` to `M5`):
   - **Mirror 1: VidSrc Ultra** (`vidsrc.to`)
   - **Mirror 2: MultiEmbed Global** (`multiembed.mov`) with multi-audio & subtitles
@@ -61,13 +79,13 @@ npm run dev
   - **Mirror 5: AutoEmbed CDN** (`autoembed.co`)
 - **Real-Debrid Scraper Support**: Direct integration with Torrentio scrapers and Real-Debrid API token vault.
 
-### 4. 100% Immersive Full-Viewport Cinema Player
+### 5. 100% Immersive Full-Viewport Cinema Player
 - Takes 100% viewport (`100dvh`), perfectly fitting the video frame without letterboxing or squishing.
 - Non-blocking floating acrylic HUD with 3.5s auto-hide timer.
 - Floating series episode navigator (`Prev` / `Next` episode).
 - 4-Tier Fullscreen, Playback Speed (0.5x to 2x), Aspect Ratio (`16:9`, `fill`, `contain`, `4:3`), and Dynamic Ambient Glow.
 
-### 5. Smart TV & Remote Control Spatial Navigation
+### 6. Smart TV & Remote Control Spatial Navigation
 - `Arrow Keys (Left/Right)`: Seek ±10 seconds
 - `Space / OK`: Play / Pause / Unmute
 - `F`: True Edge-to-Edge Fullscreen

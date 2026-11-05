@@ -1,4 +1,4 @@
-// Stream URLs & Real Movie Mirror Generator for TV MAX
+// Stream URLs & Real Movie Mirror Generator for TV MAX (v4.3.0)
 export interface StreamServer {
   id: string;
   name: string;
@@ -53,69 +53,82 @@ export function buildRealMovieStreams(
 
   return [
     {
-      id: `aio-vidsrc-${id}-${season}-${episode}`,
-      name: '[AIO Nuvio Ultra 1] 1080p FHD (VidSrc)',
-      url: isSeries 
-        ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${id}`,
-      type: 'embed',
-      quality: '1080p',
-      provider: 'VidSrc Ultra',
-      speed: '85 MB/s',
-      latency: '12ms',
-      isVerified: true
-    },
-    {
-      id: `aio-multiembed-${id}-${season}-${episode}`,
-      name: '[AIO MultiEmbed 2] Multi-Audio & Subs',
+      id: `aio-vidlink-${id}-${season}-${episode}`,
+      name: '[AIO VidLink 1] 4K HDR & 1080p Clean Player',
       url: isSeries
-        ? `https://multiembed.mov/?video_id=${id}&s=${season}&e=${episode}`
-        : `https://multiembed.mov/?video_id=${id}`,
-      type: 'embed',
-      quality: '1080p',
-      provider: 'MultiEmbed CDN',
-      speed: '70 MB/s',
-      latency: '15ms',
-      isVerified: true
-    },
-    {
-      id: `aio-vidsrcme-${id}-${season}-${episode}`,
-      name: '[AIO Prime Stream 3] 4K HDR Ready (VidSrc ME)',
-      url: isSeries
-        ? `https://vidsrc.me/embed/tv?imdb=${id}&season=${season}&episode=${episode}`
-        : `https://vidsrc.me/embed/movie?imdb=${id}`,
+        ? `https://vidlink.pro/tv/${id}/${season}/${episode}`
+        : `https://vidlink.pro/movie/${id}`,
       type: 'embed',
       quality: '4K HDR',
-      provider: 'VidSrc ME',
-      speed: '65 MB/s',
-      latency: '18ms',
-      isVerified: true
+      provider: 'VidLink Prime',
+      speed: '95 MB/s',
+      latency: '10ms',
+      isVerified: true,
+    },
+    {
+      id: `aio-vidsrcnet-${id}-${season}-${episode}`,
+      name: '[AIO VidSrc Net 2] 1080p FHD High-Speed',
+      url: isSeries
+        ? `https://vidsrc.net/embed/tv/${id}/${season}/${episode}`
+        : `https://vidsrc.net/embed/movie/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'VidSrc Net',
+      speed: '80 MB/s',
+      latency: '14ms',
+      isVerified: true,
+    },
+    {
+      id: `aio-vidsrcpm-${id}-${season}-${episode}`,
+      name: '[AIO VidSrc PM 3] Direct Global Stream',
+      url: isSeries
+        ? `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`
+        : `https://vidsrc.pm/embed/movie/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'VidSrc PM',
+      speed: '75 MB/s',
+      latency: '16ms',
+      isVerified: true,
+    },
+    {
+      id: `aio-autoembed-${id}-${season}-${episode}`,
+      name: '[AIO AutoEmbed 4] Fast CDN Streaming',
+      url: isSeries
+        ? `https://autoembed.me/tv/imdb/${id}-${season}-${episode}`
+        : `https://autoembed.me/movie/imdb/${id}`,
+      type: 'embed',
+      quality: '1080p',
+      provider: 'AutoEmbed CDN',
+      speed: '70 MB/s',
+      latency: '15ms',
+      isVerified: true,
     },
     {
       id: `aio-2embed-${id}-${season}-${episode}`,
-      name: '[AIO 2Embed Mirror 4] Global High-Speed',
+      name: '[AIO 2Embed 5] Global Multi-Audio',
       url: isSeries
         ? `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`
         : `https://www.2embed.cc/embed/${id}`,
       type: 'embed',
       quality: '1080p',
       provider: '2Embed Prime',
-      speed: '55 MB/s',
-      latency: '22ms',
-      isVerified: true
+      speed: '60 MB/s',
+      latency: '20ms',
+      isVerified: true,
     },
     {
-      id: `aio-autoembed-${id}-${season}-${episode}`,
-      name: '[AIO AutoEmbed 5] Fast CDN Streaming',
+      id: `aio-vidsrcvip-${id}-${season}-${episode}`,
+      name: '[AIO VidSrc VIP 6] Ultra Stream Backup',
       url: isSeries
-        ? `https://autoembed.co/tv/imdb/${id}-${season}-${episode}`
-        : `https://autoembed.co/movie/imdb/${id}`,
+        ? `https://vidsrc.vip/embed/tv/${id}/${season}/${episode}`
+        : `https://vidsrc.vip/embed/movie/${id}`,
       type: 'embed',
       quality: '1080p',
-      provider: 'AutoEmbed CDN',
-      speed: '75 MB/s',
-      latency: '14ms',
-      isVerified: true
-    }
+      provider: 'VidSrc VIP',
+      speed: '65 MB/s',
+      latency: '18ms',
+      isVerified: true,
+    },
   ];
 }

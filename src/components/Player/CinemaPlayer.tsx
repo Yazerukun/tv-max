@@ -22,7 +22,8 @@ import {
   Users,
   Subtitles,
   Sliders,
-  Check
+  Check,
+  ExternalLink
 } from 'lucide-react';
 import { CinemaMovie, Episode, StreamServer } from '../../data/cinemaMovies';
 import { 
@@ -90,7 +91,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
             id: 'srv-default',
             name: 'AIO Default Stream',
             url: movie.streamUrl,
-            type: /vidsrc|multiembed|2embed|embed|autoembed|player|youtube/i.test(movie.streamUrl) ? 'embed' : (movie.streamUrl.includes('.m3u8') ? 'hls' : 'mp4'),
+            type: /vidlink|vidsrc|multiembed|2embed|embed|autoembed|player|moviesapi|youtube/i.test(movie.streamUrl) ? 'embed' : (movie.streamUrl.includes('.m3u8') ? 'hls' : 'mp4'),
             quality: movie.quality,
             provider: 'AIOStreams',
           },
@@ -111,7 +112,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
   // Detect whether the URL is a Web Embed (e.g. VidSrc, MultiEmbed, 2Embed, AutoEmbed)
   const isEmbedStream = useMemo(() => {
     if (activeServer?.type === 'embed') return true;
-    return /vidsrc|multiembed|2embed|embed|autoembed|player|youtube(-nocookie)?\.com|youtu\.be|dailymotion\.com|vimeo\.com/i.test(activeStreamUrl);
+    return /vidlink|vidsrc|multiembed|2embed|embed|autoembed|player|moviesapi|youtube(-nocookie)?\.com|youtu\.be|dailymotion\.com|vimeo\.com/i.test(activeStreamUrl);
   }, [activeServer, activeStreamUrl]);
 
   // Clean Embed URL with unmuted autoplay parameters
@@ -418,6 +419,7 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
             className="w-full h-full border-0 bg-black"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
+            referrerPolicy="origin"
             title={movie.title}
           />
         ) : (
@@ -592,6 +594,16 @@ export const CinemaPlayer: React.FC<CinemaPlayerProps> = ({
                 ))}
               </div>
             )}
+
+            <a
+              href={normalizeEmbedUrl(activeStreamUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 rounded-xl text-slate-300 hover:text-cyan-400 hover:bg-white/10 transition"
+              title="Open Direct Stream in New Tab"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
 
             <button
               onClick={toggleFullscreen}
